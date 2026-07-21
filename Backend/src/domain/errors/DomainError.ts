@@ -22,3 +22,10 @@ export class EmailYaRegistradoError extends DomainError {
     super(`El email "${email}" ya está registrado`);
   }
 }
+
+export class CredencialesInvalidasError extends DomainError {
+    constructor(
+    ){
+        super('Email o contraseña incorrectos.')
+    }
+}

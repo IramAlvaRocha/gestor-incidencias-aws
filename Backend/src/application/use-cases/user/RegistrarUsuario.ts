@@ -3,13 +3,17 @@ import { User } from "../../../domain/entities/user.entity.js";
 import { EmailYaRegistradoError } from "../../../domain/errors/DomainError.js";
 import type { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
 import { randomUUID } from "crypto";
+import type { IPasswordHasher } from "../../ports/IPasswordHasher.js";
 
 interface RegistrarUsuarioDTO extends Omit<User, "id" | "passwordHash"> {
   password: string;
 }
 
 export class RegistrarUsuarioUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly passwordHasher: IPasswordHasher
+  ) {}
 
   async execute(data: RegistrarUsuarioDTO): Promise<User> {
     const usuarioExiste = await this.userRepository.getByEmail(data.email);
@@ -18,7 +22,7 @@ export class RegistrarUsuarioUseCase {
       throw new EmailYaRegistradoError(data.email);
     }
 
-    const passwordHash = await bcrypt.hash(data.password, 10);
+    const passwordHash = await this.passwordHasher.hash(data.password);
 
     const nuevoUsuario = User.crear({
       id: randomUUID(),

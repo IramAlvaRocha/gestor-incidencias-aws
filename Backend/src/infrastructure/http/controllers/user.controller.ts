@@ -8,7 +8,7 @@ import {
   EmailYaRegistradoError,
 } from "../../../domain/errors/DomainError.js";
 
-const toUseResponse = (user: User) => ({
+const toUserResponse = (user: User) => ({
   id: user.id,
   nombre: user.nombre,
   rol: user.rol,
@@ -25,7 +25,7 @@ export class UserController {
   registrar = async (req: Request, res: Response) => {
     try {
       const usuario = await this.registrarUsuarioUseCase.execute(req.body);
-      return res.status(201).json(toUseResponse(usuario));
+      return res.status(201).json(toUserResponse(usuario));
     } catch (error) {
       if (error instanceof EmailYaRegistradoError) {
         return res.status(409).json({ error: error.message });
@@ -39,4 +39,12 @@ export class UserController {
         .json({ error: "Error interno al registrar usuario" });
     }
   };
+
+  listar = async(req: Request, res: Response) => {
+    
+
+    const usuarios = await this.listarUsuariosUseCase.execute()
+
+    return res.status(200).json(usuarios.map(toUserResponse))
+  }
 }
