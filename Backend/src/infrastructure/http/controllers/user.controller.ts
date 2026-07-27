@@ -1,4 +1,3 @@
-import { email } from "zod";
 import type { User } from "../../../domain/entities/user.entity.js";
 import type { RegistrarUsuarioUseCase } from "../../../application/use-cases/user/RegistrarUsuario.js";
 import type { ListarUsuariosUseCase } from "../../../application/use-cases/user/ListarUsuarios.js";

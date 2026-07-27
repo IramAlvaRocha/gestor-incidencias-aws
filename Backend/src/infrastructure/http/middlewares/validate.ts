@@ -7,7 +7,7 @@ export const validate = (schema: ZodSchema) =>
     const resultado = schema.safeParse(req.body);
 
     if(!resultado.success)
-        res.status(400).json({ errores: resultado.error.flatten().fieldErrors });
+        return res.status(400).json({ errores: resultado.error.flatten().fieldErrors });
 
     req.body = resultado.data;
 

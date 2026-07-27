@@ -1,5 +1,4 @@
-import { KeyProyectoInvalidoError, NombreProyectoInvalidoError } from "../errors/ProjectError.js"
-import { MiembroYaExisteError } from "../errors/TicketError.js";
+import { KeyProyectoInvalidoError, MiembroYaExisteError, NombreProyectoInvalidoError } from "../errors/ProjectError.js"
 
 interface CrearProjectProps {
     id: string,

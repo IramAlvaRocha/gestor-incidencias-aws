@@ -4,14 +4,14 @@ import { CredencialesInvalidasError } from "../../../domain/errors/UserError.js"
 
 export class AuthController {
     constructor(
-        private readonly autenticarUsusario : AutenticarUsuarioUseCase
+        private readonly autenticarUsuario : AutenticarUsuarioUseCase
     ){
 
     }
 
     login = async(req: Request, res: Response) => {
         try {
-            const resultado = await this.autenticarUsusario.execute(req.body);
+            const resultado = await this.autenticarUsuario.execute(req.body);
 
             return res.status(200).json(resultado)
 

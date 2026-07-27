@@ -1,5 +1,5 @@
 import { Project } from "../../domain/entities/project.entity.js";
-import { KeyProyectoInvalidoError } from "../../domain/errors/ProjectError.js";
+import { KeyDuplicadaError, KeyProyectoInvalidoError } from "../../domain/errors/ProjectError.js";
 import type { IProjectRepository } from "../../domain/repositories/IProjectRepository.js";
 import { randomUUID } from "crypto";
 
@@ -16,16 +16,17 @@ export class CrearProjectUseCase {
     ){}
 
     async execute(props: CrearProjectDTO): Promise<Project> {
+        const keyNormalizada = props.key.trim().toUpperCase();
         
-        const projectExiste = await this.repository.buscarPorKey(props.key);
+        const projectExiste = await this.repository.buscarPorKey(keyNormalizada);
 
-        if(projectExiste) throw new KeyProyectoInvalidoError();
+        if(projectExiste) throw new KeyDuplicadaError(keyNormalizada);
 
         const nuevoProject = Project.crear({
             id: randomUUID(),
             nombre: props.nombre,
             descripcion: props.descripcion,
-            key: props.key,
+            key: keyNormalizada,
             ownerId: props.ownerId,
             fechaCreacion: new Date()
         })

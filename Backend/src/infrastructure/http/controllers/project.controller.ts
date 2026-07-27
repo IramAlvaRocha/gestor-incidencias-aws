@@ -1,12 +1,12 @@
 import { CrearProjectUseCase } from '../../../application/project/CrearProject.js';
 import type {Response, Request} from "express"
-import { KeyProyectoInvalidoError, NoAutorizadoError, ProjectNoEncontradoError, UsuarioNoEncontradoError } from '../../../domain/errors/ProjectError.js';
+import { KeyDuplicadaError, KeyProyectoInvalidoError, NoAutorizadoError, ProjectNoEncontradoError, UsuarioNoEncontradoError } from '../../../domain/errors/ProjectError.js';
 import { DomainError } from '../../../domain/errors/DomainError.js';
 import type { ListarProjectsUseCase } from '../../../application/project/ListarProjects.js';
 import type { AgregarMiembroAProject } from '../../../application/project/AgregarMiembroAProject.js';
 export class ProjectController {
     constructor(
-        private readonly crearUsuario: CrearProjectUseCase,
+        private readonly crearProject: CrearProjectUseCase,
         private readonly listarProjects: ListarProjectsUseCase,
         private readonly agregarMiembro: AgregarMiembroAProject,
     ){}
@@ -15,14 +15,24 @@ export class ProjectController {
         try {
             const ownerId = req.usuarioAutenticado?.userId;
 
-            const project = await this.crearUsuario.execute(req.body);
+            if (!ownerId) {
+                return res.status(401).json({ error: 'Usuario no autenticado' });
+            }
+
+            const project = await this.crearProject.execute({
+                ...req.body,
+                ownerId,
+            });
 
             return res.status(201).json(project);
 
         } catch (error) {
             
+            if(error instanceof KeyDuplicadaError)
+                return res.status(409).json({ error: error.message })
+
             if(error instanceof KeyProyectoInvalidoError) 
-                throw res.status(409).json({error: error.message})
+                return res.status(400).json({error: error.message})
 
             if(error instanceof DomainError)
                 return res.status(409).json({

@@ -12,8 +12,3 @@ export class DescripcionInvalidaError extends DomainError {
     }
 }
 
-export class MiembroYaExisteError extends DomainError {
-  constructor(userId: string) {
-    super(`El usuario "${userId}" ya es miembro de este proyecto`);
-  }
-}

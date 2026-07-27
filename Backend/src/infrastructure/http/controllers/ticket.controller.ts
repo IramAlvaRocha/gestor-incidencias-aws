@@ -5,8 +5,8 @@ import { crearTicketSchema } from '../validators/ticket.schema.js';
 
 export class TicketController {
   constructor(
-    private readonly crearTickerUseCase: CrearTicketUseCase,
-    private readonly obtenerTickerUseCase: ObtenerTicketsUseCase
+    private readonly crearTicketUseCase: CrearTicketUseCase,
+    private readonly obtenerTicketUseCase: ObtenerTicketsUseCase
   ) {}
 
   crear = async (req: Request, res: Response) => {
@@ -17,18 +17,24 @@ export class TicketController {
   }
 
   const { titulo, descripcion, prioridad } = resultado.data;
+  const reporterId = req.usuarioAutenticado?.userId;
 
-  const incidencia = await this.crearTickerUseCase.execute({
+  if (!reporterId) {
+    return res.status(401).json({ error: 'Usuario no autenticado' });
+  }
+
+  const ticket = await this.crearTicketUseCase.execute({
     titulo,
     descripcion,
-    prioridad, // ya es Prioridad | undefined, coincide con el DTO
+    prioridad,
+    reporterId,
   });
 
-  return res.status(201).json(incidencia);
+  return res.status(201).json(ticket);
 };
 
   listar = async (_req: Request, res: Response) => {
-    const incidencias = await this.obtenerTickerUseCase.execute();
-    return res.status(200).json(incidencias);
+    const tickets = await this.obtenerTicketUseCase.execute();
+    return res.status(200).json(tickets);
   };
 }

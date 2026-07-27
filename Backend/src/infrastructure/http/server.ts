@@ -13,11 +13,14 @@ import { crearAuthRouter } from './routes/auth.routes.js';
 
 // Ports (para poder construir el middleware de autenticación aquí)
 import { type ITokenService } from '../../application/ports/ITokenService.js';
+import { crearProjectRouter } from './routes/project.routes.js';
+import { ProjectController } from './controllers/project.controller.js';
 
 interface ServerDependencies {
   ticketController: TicketController;
   userController: UserController;
   authController: AuthController;
+  projectController: ProjectController;
   tokenService: ITokenService;
 }
 
@@ -25,8 +28,10 @@ export const crearServidor = ({
   ticketController,
   userController,
   authController,
+  projectController,
   tokenService,
 }: ServerDependencies): Application => {
+
   const app = express();
 
   app.use(cors());
@@ -38,10 +43,10 @@ export const crearServidor = ({
   // Rutas que pueden tener endpoints protegidos internamente
   app.use('/api/users', crearUserRouter(userController, tokenService));
   app.use('/api/tickets', crearTicketRouter(ticketController, tokenService));
+  app.use('/api/projects', crearProjectRouter(projectController, tokenService));
 
-  app.get('/', (_req, res) => {
-    res.send('API Mini-Jira - Clean Architecture 🚀');
-  });
+  app.get('/', (_req, res) => res.send('API Mini-Jira - Clean Architecture 🚀'));
+
 
   return app;
 };

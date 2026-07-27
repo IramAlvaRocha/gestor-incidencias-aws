@@ -12,6 +12,12 @@ export class KeyProyectoInvalidoError extends DomainError {
     }
 }
 
+export class KeyDuplicadaError extends DomainError {
+    constructor(key: string) {
+        super(`El key "${key}" ya está en uso en otro proyecto`);
+    }
+}
+
 export class MiembroYaExisteError extends DomainError {
   constructor(userId: string) {
     super(`El usuario "${userId}" ya es miembro de este proyecto`);

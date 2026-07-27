@@ -7,7 +7,7 @@ export const autenticate = (tokenService: ITokenService) =>
         const authHeader = req.headers.authorization;
         
         if(!authHeader || !authHeader.startsWith('Bearer ')){
-            return res.status(401)
+            return res.status(401).json({ error: 'Token no proporcionado' })
         }
 
         const token = authHeader.split(" ")[1];

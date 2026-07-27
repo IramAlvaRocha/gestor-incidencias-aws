@@ -1,4 +1,3 @@
-import { uuidv4 } from "zod";
 import { DescripcionInvalidaError, TituloInvalidoError } from "../errors/TicketError.js";
 
 export type EstadoTicket = "Abierto" | "En Progreso" | "Cerrado";

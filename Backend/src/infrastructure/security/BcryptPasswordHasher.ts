@@ -10,7 +10,7 @@ export class BcryptPasswordHasher implements IPasswordHasher {
     }
 
     comparar(passwordPlano: string, passwordHash: string): Promise<boolean> {
-        return bcrypt.compare(passwordHash, passwordPlano);
+        return bcrypt.compare(passwordPlano, passwordHash);
     }
 
 }
