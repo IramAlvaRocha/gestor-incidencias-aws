@@ -11,3 +11,9 @@ export class DescripcionInvalidaError extends DomainError {
         super("La descripción del ticket no es válida.")
     }
 }
+
+export class MiembroYaExisteError extends DomainError {
+  constructor(userId: string) {
+    super(`El usuario "${userId}" ya es miembro de este proyecto`);
+  }
+}
