@@ -1,5 +1,5 @@
-import type { Project } from "../../domain/entities/project.entity.js";
-import type { IProjectRepository } from "../../domain/repositories/IProjectRepository.js";
+import type { Project } from "../../../domain/entities/project.entity.js";
+import type { IProjectRepository } from "../../../domain/repositories/IProjectRepository.js";
 
 export class GetAllProjectsUseCase {
     constructor(

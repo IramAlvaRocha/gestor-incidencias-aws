@@ -43,3 +43,8 @@ export class UserNotFoundError extends DomainError {
         super(`No se encontro el usuario con el id ${userId}`)
     }
 }
+export class MemberNotInProject extends DomainError {
+    constructor() {
+        super("Debes ser un miembro del proyecto para poder crear tickets.")
+    }
+}

@@ -22,9 +22,9 @@ import { CreateTicketUseCase } from './application/use-cases/tickets/CreateTicke
 import { GetAllTicketsUseCase } from './application/use-cases/tickets/GetAllTickets.js';
 import { ProjectController } from './infrastructure/http/controllers/project.controller.js';
 import { InMemoryProjectRepository } from './infrastructure/repositories/InMemoryProjectRepository.js';
-import { CreateProjectUseCase } from './application/project/CreateProject.js';
-import { GetAllProjectsUseCase } from './application/project/GetAllProjects.js';
-import { AddMemberToProject } from './application/project/AddMemberToProject.js';
+import { CreateProjectUseCase } from './application/use-cases/project/CreateProject.js';
+import { GetAllProjectsUseCase } from './application/use-cases/project/GetAllProjects.js';
+import { AddMemberToProject } from './application/use-cases/project/AddMemberToProject.js';
 
 const PORT = process.env.PORT ?? 3000;
 if (!process.env.JWT_SECRET) {

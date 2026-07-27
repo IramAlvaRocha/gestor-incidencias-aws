@@ -5,8 +5,8 @@ export type Priority = "Baja" | "Media" | "Alta";
 export type TicketType = "Bug" | "Tarea" | "Historia" | "Mejora"
 
 interface CreateTicketProps {
-  key: string;
   id: string;
+  key: string;
   title: string;
   description: string;
   type: TicketType;

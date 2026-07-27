@@ -1,9 +1,9 @@
-import { CreateProjectUseCase } from '../../../application/project/CreateProject.js';
+import { CreateProjectUseCase } from '../../../application/use-cases/project/CreateProject.js';
 import type {Response, Request} from "express"
 import { DuplicateKeyError, InvalidProjectKeyError, NotAuthorizedError, ProjectNotFoundError, UserNotFoundError } from '../../../domain/errors/ProjectError.js';
 import { DomainError } from '../../../domain/errors/DomainError.js';
-import type { GetAllProjectsUseCase } from '../../../application/project/GetAllProjects.js';
-import type { AddMemberToProject } from '../../../application/project/AddMemberToProject.js';
+import type { GetAllProjectsUseCase } from '../../../application/use-cases/project/GetAllProjects.js';
+import type { AddMemberToProject } from '../../../application/use-cases/project/AddMemberToProject.js';
 export class ProjectController {
     constructor(
         private readonly createProject: CreateProjectUseCase,

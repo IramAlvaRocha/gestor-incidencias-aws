@@ -1,6 +1,6 @@
-import { NotAuthorizedError, ProjectNotFoundError, UserNotFoundError } from "../../domain/errors/ProjectError.js";
-import type { IProjectRepository } from "../../domain/repositories/IProjectRepository.js";
-import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
+import { NotAuthorizedError, ProjectNotFoundError, UserNotFoundError } from "../../../domain/errors/ProjectError.js";
+import type { IProjectRepository } from "../../../domain/repositories/IProjectRepository.js";
+import type { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
 
 interface AddMemberDTO {
     projectId: string, 
