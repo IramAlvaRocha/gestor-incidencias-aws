@@ -1,11 +1,11 @@
 import type { NextFunction, Response, Request } from "express";
 
-export const autorize = (...rolesPermitidos: string[]) => 
+export const authorize = (...allowedRoles: string[]) => 
     (req: Request, res: Response, next: NextFunction) => {
 
-        const usuario = req.usuarioAutenticado;
+        const user = req.authenticatedUser;
         
-        if( !usuario || !rolesPermitidos.includes(usuario.rol) )
+        if( !user || !allowedRoles.includes(user.role) )
             return res.status(403).json({ error: 'No tienes permisos para realizar esta acción' })
 
         next();

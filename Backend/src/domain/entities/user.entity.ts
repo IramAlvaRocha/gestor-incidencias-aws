@@ -1,51 +1,50 @@
 import {
-  EmailInvalidoError,
-  NombreInvalidoError,
+  InvalidEmailError,
+  InvalidNameError,
 } from "../errors/UserError.js";
 
-export type Rol = "Admin" | "Developer" | "Reporter";
+export type Role = "Admin" | "Developer" | "Reporter";
 
 interface CreateUserProps {
   id: string;
-  nombre: string;
+  name: string;
   email: string;
   passwordHash: string;
-  rol: Rol;
-  fechaCreacion: Date;
+  role: Role;
+  createdAt: Date;
 }
 
 export class User {
   constructor(
     public readonly id: string,
-    public readonly nombre: string,
+    public readonly name: string,
     public readonly email: string,
     public readonly passwordHash: string,
-    public readonly rol: Rol,
-    public readonly fechaCreacion: Date,
+    public readonly role: Role,
+    public readonly createdAt: Date,
   ) {}
 
-  // Factory method: única forma de crear un User válido
-  static crear(props: CreateUserProps): User {
+  static create(props: CreateUserProps): User {
 
-    if (!User.esEmailValido(props.email)) {
-      throw new EmailInvalidoError(props.email);
+    if (!User.isValidEmail(props.email)) {
+      throw new InvalidEmailError(props.email);
     }
     
-    if (props.nombre.trim().length < 2) {
-      throw new NombreInvalidoError();
+    if (props.name.trim().length < 2) {
+      throw new InvalidNameError();
     }
 
     return new User(
       props.id,
-      props.nombre.trim(),
+      props.name.trim(),
       props.email.toLowerCase(),
       props.passwordHash,
-      props.rol,
-      props.fechaCreacion,
+      props.role,
+      props.createdAt,
     );
   }
 
-  private static esEmailValido(email: string): boolean {
+  private static isValidEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 }

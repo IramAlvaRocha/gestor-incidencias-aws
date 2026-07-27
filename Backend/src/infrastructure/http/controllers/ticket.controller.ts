@@ -1,40 +1,40 @@
 import type { Request, Response } from 'express';
-import type { CrearTicketUseCase } from '../../../application/use-cases/tickets/CrearTicket.js';
-import type { ObtenerTicketsUseCase } from '../../../application/use-cases/tickets/ObtenerTickets.js';
-import { crearTicketSchema } from '../validators/ticket.schema.js';
+import type { CreateTicketUseCase } from '../../../application/use-cases/tickets/CreateTicket.js';
+import type { GetAllTicketsUseCase } from '../../../application/use-cases/tickets/GetAllTickets.js';
+import { createTicketSchema } from '../validators/ticket.schema.js';
 
 export class TicketController {
   constructor(
-    private readonly crearTicketUseCase: CrearTicketUseCase,
-    private readonly obtenerTicketUseCase: ObtenerTicketsUseCase
+    private readonly createTicketUseCase: CreateTicketUseCase,
+    private readonly getAllTicketsUseCase: GetAllTicketsUseCase
   ) {}
 
-  crear = async (req: Request, res: Response) => {
-  const resultado = crearTicketSchema.safeParse(req.body);
+  create = async (req: Request, res: Response) => {
+  const result = createTicketSchema.safeParse(req.body);
 
-  if (!resultado.success) {
-    return res.status(400).json({ errores: resultado.error.flatten().fieldErrors });
+  if (!result.success) {
+    return res.status(400).json({ errors: result.error.flatten().fieldErrors });
   }
 
-  const { titulo, descripcion, prioridad } = resultado.data;
-  const reporterId = req.usuarioAutenticado?.userId;
+  const { title, description, priority } = result.data;
+  const reporterId = req.authenticatedUser?.userId;
 
   if (!reporterId) {
     return res.status(401).json({ error: 'Usuario no autenticado' });
   }
 
-  const ticket = await this.crearTicketUseCase.execute({
-    titulo,
-    descripcion,
-    prioridad,
+  const ticket = await this.createTicketUseCase.execute({
+    title,
+    description,
+    priority,
     reporterId,
   });
 
   return res.status(201).json(ticket);
 };
 
-  listar = async (_req: Request, res: Response) => {
-    const tickets = await this.obtenerTicketUseCase.execute();
+  getAll = async (_req: Request, res: Response) => {
+    const tickets = await this.getAllTicketsUseCase.execute();
     return res.status(200).json(tickets);
   };
 }

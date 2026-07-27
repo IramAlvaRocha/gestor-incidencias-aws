@@ -1,30 +1,30 @@
 import type { User } from "../../../domain/entities/user.entity.js";
-import type { RegistrarUsuarioUseCase } from "../../../application/use-cases/user/RegistrarUsuario.js";
-import type { ListarUsuariosUseCase } from "../../../application/use-cases/user/ListarUsuarios.js";
+import type { RegisterUserUseCase } from "../../../application/use-cases/user/RegisterUser.js";
+import type { GetAllUsersUseCase } from "../../../application/use-cases/user/GetAllUsers.js";
 import type { Response, Request } from "express";
 import { DomainError } from "../../../domain/errors/DomainError.js";
-import { EmailYaRegistradoError } from "../../../domain/errors/UserError.js";
+import { EmailAlreadyRegisteredError } from "../../../domain/errors/UserError.js";
 
 const toUserResponse = (user: User) => ({
   id: user.id,
-  nombre: user.nombre,
-  rol: user.rol,
+  name: user.name,
+  role: user.role,
   email: user.email,
-  fechaCreacion: user.fechaCreacion,
+  createdAt: user.createdAt,
 });
 
 export class UserController {
   constructor(
-    private readonly registrarUsuarioUseCase: RegistrarUsuarioUseCase,
-    private readonly listarUsuariosUseCase: ListarUsuariosUseCase,
+    private readonly registerUserUseCase: RegisterUserUseCase,
+    private readonly getAllUsersUseCase: GetAllUsersUseCase,
   ) {}
 
-  registrar = async (req: Request, res: Response) => {
+  register = async (req: Request, res: Response) => {
     try {
-      const usuario = await this.registrarUsuarioUseCase.execute(req.body);
-      return res.status(201).json(toUserResponse(usuario));
+      const user = await this.registerUserUseCase.execute(req.body);
+      return res.status(201).json(toUserResponse(user));
     } catch (error) {
-      if (error instanceof EmailYaRegistradoError) {
+      if (error instanceof EmailAlreadyRegisteredError) {
         return res.status(409).json({ error: error.message });
       }
       if (error instanceof DomainError) {
@@ -37,11 +37,11 @@ export class UserController {
     }
   };
 
-  listar = async(req: Request, res: Response) => {
+  getAll = async(req: Request, res: Response) => {
     
 
-    const usuarios = await this.listarUsuariosUseCase.execute()
+    const users = await this.getAllUsersUseCase.execute()
 
-    return res.status(200).json(usuarios.map(toUserResponse))
+    return res.status(200).json(users.map(toUserResponse))
   }
 }

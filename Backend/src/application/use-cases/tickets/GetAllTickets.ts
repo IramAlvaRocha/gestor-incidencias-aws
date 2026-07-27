@@ -2,7 +2,7 @@ import type { ITicketRepository } from "../../../domain/repositories/ITicketRepo
 
 
 
-export class ObtenerTicketsUseCase { 
+export class GetAllTicketsUseCase { 
 
     constructor(private readonly repository: ITicketRepository){}
 

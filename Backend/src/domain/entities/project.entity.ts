@@ -1,55 +1,55 @@
-import { KeyProyectoInvalidoError, MiembroYaExisteError, NombreProyectoInvalidoError } from "../errors/ProjectError.js"
+import { InvalidProjectKeyError, MemberAlreadyExistsError, InvalidProjectNameError } from "../errors/ProjectError.js"
 
-interface CrearProjectProps {
+interface CreateProjectProps {
     id: string,
-    nombre: string,
+    name: string,
     key: string,
-    descripcion: string,
+    description: string,
     ownerId: string,
-    fechaCreacion: Date
+    createdAt: Date
 }
 
 export class Project {
     constructor(
         public readonly id: string,
-        public readonly nombre: string,
+        public readonly name: string,
         public readonly key: string,
-        public readonly descripcion: string,
+        public readonly description: string,
         public readonly ownerId: string,
-        public readonly miembros: string[],
-        public readonly fechaCreacion: Date, 
+        public readonly members: string[],
+        public readonly createdAt: Date, 
     ){
     }
 
-    static crear(props: CrearProjectProps): Project {
-        if(!props.nombre) throw new NombreProyectoInvalidoError();
-         const keyNormalizado = props.key.trim().toUpperCase();
+    static create(props: CreateProjectProps): Project {
+        if(!props.name) throw new InvalidProjectNameError();
+         const normalizedKey = props.key.trim().toUpperCase();
 
-        if (!/^[A-Z]{2,10}$/.test(keyNormalizado)) throw new KeyProyectoInvalidoError();
+        if (!/^[A-Z]{2,10}$/.test(normalizedKey)) throw new InvalidProjectKeyError();
         
         return new Project(
             props.id,
-            props.nombre,
-            keyNormalizado,
-            props.descripcion,
+            props.name,
+            normalizedKey,
+            props.description,
             props.ownerId,
             [props.ownerId],
-            props.fechaCreacion
+            props.createdAt
         )
     }
 
-    esOwner(userId: string): boolean {
+    isOwner(userId: string): boolean {
         return this.ownerId === userId
     }
 
-    esMiembro(userId: string): boolean {
-        return this.miembros.includes(userId);
+    isMember(userId: string): boolean {
+        return this.members.includes(userId);
     }
 
-    agregarMiembro(userId: string): void {
-        if(this.esMiembro(userId))
-            throw new MiembroYaExisteError(userId);
+    addMember(userId: string): void {
+        if(this.isMember(userId))
+            throw new MemberAlreadyExistsError(userId);
 
-        this.miembros.push(userId)
+        this.members.push(userId)
     }
 }

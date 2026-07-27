@@ -1,22 +1,22 @@
 import { response, type Request, type Response } from "express"
-import type { AutenticarUsuarioUseCase } from "../../../application/use-cases/auth/AutenticarUsuario.js"
-import { CredencialesInvalidasError } from "../../../domain/errors/UserError.js";
+import type { AuthenticateUserUseCase } from "../../../application/use-cases/auth/AuthenticateUser.js"
+import { InvalidCredentialsError } from "../../../domain/errors/UserError.js";
 
 export class AuthController {
     constructor(
-        private readonly autenticarUsuario : AutenticarUsuarioUseCase
+        private readonly authenticateUser : AuthenticateUserUseCase
     ){
 
     }
 
     login = async(req: Request, res: Response) => {
         try {
-            const resultado = await this.autenticarUsuario.execute(req.body);
+            const result = await this.authenticateUser.execute(req.body);
 
-            return res.status(200).json(resultado)
+            return res.status(200).json(result)
 
         } catch (error) {
-            if( error instanceof CredencialesInvalidasError) {
+            if( error instanceof InvalidCredentialsError) {
                 return res.status(401).json({
                     error: error.message
                 })

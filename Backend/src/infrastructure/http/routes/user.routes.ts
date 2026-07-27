@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import { validate } from '../middlewares/validate.js';
-import { registrarUsuarioSchema } from '../validators/user.schema.js';
+import { registerUserSchema } from '../validators/user.schema.js';
 import type { UserController } from '../controllers/user.controller.js';
 import type { ITokenService } from '../../../application/ports/ITokenService.js';
-import { autenticate } from '../middlewares/authenticate.js';
-import { autorize } from '../middlewares/authorize.js';
+import { authenticate } from '../middlewares/authenticate.js';
+import { authorize } from '../middlewares/authorize.js';
 
-export const crearUserRouter = (controller: UserController, tokenService: ITokenService): Router => {
+export const createUserRouter = (controller: UserController, tokenService: ITokenService): Router => {
   const router = Router();
 
-  router.post('/', validate(registrarUsuarioSchema), controller.registrar);
-  router.get('/', autenticate(tokenService), autorize('Admin'),controller.listar);
+  router.post('/', validate(registerUserSchema), controller.register);
+  router.get('/', authenticate(tokenService), authorize('Admin'),controller.getAll);
 
   return router;
 };

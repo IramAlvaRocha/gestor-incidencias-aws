@@ -1,9 +1,9 @@
 export interface TokenPayload {
   userId: string;
-  rol: string;
+  role: string;
 }
 
 export interface ITokenService {
-  generar(payload: TokenPayload): string;
-  verificar(token: string): TokenPayload;
+  generate(payload: TokenPayload): string;
+  verify(token: string): TokenPayload;
 }

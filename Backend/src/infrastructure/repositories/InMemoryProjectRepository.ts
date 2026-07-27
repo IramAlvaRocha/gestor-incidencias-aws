@@ -6,12 +6,12 @@ export class InMemoryProjectRepository implements IProjectRepository{
 
     private projects: Project[] = [];
 
-    async guardar(project: Project): Promise<Project> {
+    async save(project: Project): Promise<Project> {
         this.projects.push(project);
         return project;
     }
 
-    async actualizar(project: Project): Promise<Project> {
+    async update(project: Project): Promise<Project> {
         const index = this.projects.findIndex((p) => p.id === project.id);
         
         if (index !== -1) {
@@ -20,16 +20,16 @@ export class InMemoryProjectRepository implements IProjectRepository{
 
         return project;
     }
-    async obtenerTodos(): Promise<Project[]> {
+    async getAll(): Promise<Project[]> {
         return this.projects;
     }
     
-    async obtenerPorId(id: string): Promise<Project | null> {
+    async getById(id: string): Promise<Project | null> {
         const project = this.projects.find(project => project.id === id);
         return project ?? null;
     }
 
-    async buscarPorKey(key: string): Promise<Project | null> {
+    async findByKey(key: string): Promise<Project | null> {
         const project = this.projects.find((p) => p.key === key)
         return project ?? null;
     }

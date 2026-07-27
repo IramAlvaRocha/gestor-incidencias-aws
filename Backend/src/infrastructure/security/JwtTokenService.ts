@@ -9,13 +9,13 @@ export class JsonWebTokenService implements ITokenService {
         private readonly expiresIn: string,
     ){}
 
-    generar(payload: TokenPayload): string {
+    generate(payload: TokenPayload): string {
         return jwt.sign(payload,this.secret, { 
             expiresIn: this.expiresIn
         } as jwt.SignOptions);
     }
     
-    verificar(token: string): TokenPayload {
+    verify(token: string): TokenPayload {
         return jwt.verify(token, this.secret) as TokenPayload;
     }
 

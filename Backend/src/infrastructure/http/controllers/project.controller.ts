@@ -1,25 +1,25 @@
-import { CrearProjectUseCase } from '../../../application/project/CrearProject.js';
+import { CreateProjectUseCase } from '../../../application/project/CreateProject.js';
 import type {Response, Request} from "express"
-import { KeyDuplicadaError, KeyProyectoInvalidoError, NoAutorizadoError, ProjectNoEncontradoError, UsuarioNoEncontradoError } from '../../../domain/errors/ProjectError.js';
+import { DuplicateKeyError, InvalidProjectKeyError, NotAuthorizedError, ProjectNotFoundError, UserNotFoundError } from '../../../domain/errors/ProjectError.js';
 import { DomainError } from '../../../domain/errors/DomainError.js';
-import type { ListarProjectsUseCase } from '../../../application/project/ListarProjects.js';
-import type { AgregarMiembroAProject } from '../../../application/project/AgregarMiembroAProject.js';
+import type { GetAllProjectsUseCase } from '../../../application/project/GetAllProjects.js';
+import type { AddMemberToProject } from '../../../application/project/AddMemberToProject.js';
 export class ProjectController {
     constructor(
-        private readonly crearProject: CrearProjectUseCase,
-        private readonly listarProjects: ListarProjectsUseCase,
-        private readonly agregarMiembro: AgregarMiembroAProject,
+        private readonly createProject: CreateProjectUseCase,
+        private readonly getAllProjects: GetAllProjectsUseCase,
+        private readonly addMemberToProjectUseCase: AddMemberToProject,
     ){}
 
-    crear = async(req: Request, res: Response) => {
+    create = async(req: Request, res: Response) => {
         try {
-            const ownerId = req.usuarioAutenticado?.userId;
+            const ownerId = req.authenticatedUser?.userId;
 
             if (!ownerId) {
                 return res.status(401).json({ error: 'Usuario no autenticado' });
             }
 
-            const project = await this.crearProject.execute({
+            const project = await this.createProject.execute({
                 ...req.body,
                 ownerId,
             });
@@ -28,10 +28,10 @@ export class ProjectController {
 
         } catch (error) {
             
-            if(error instanceof KeyDuplicadaError)
+            if(error instanceof DuplicateKeyError)
                 return res.status(409).json({ error: error.message })
 
-            if(error instanceof KeyProyectoInvalidoError) 
+            if(error instanceof InvalidProjectKeyError) 
                 return res.status(400).json({error: error.message})
 
             if(error instanceof DomainError)
@@ -48,28 +48,28 @@ export class ProjectController {
         }
     }
 
-    listar = async (_req: Request, res: Response) => {
-    const projects = await this.listarProjects.execute();
+    getAll = async (_req: Request, res: Response) => {
+    const projects = await this.getAllProjects.execute();
     return res.status(200).json(projects);
   };
 
-  agregarMiembroAProyecto = async (req: Request, res: Response) => {
+  addMemberToProject = async (req: Request, res: Response) => {
     try {
-      const solicitanteId = req.usuarioAutenticado!.userId;
+      const requesterId = req.authenticatedUser!.userId;
       const { id: projectId } = req.params;
 
-      const project = await this.agregarMiembro.execute({
+      const project = await this.addMemberToProjectUseCase.execute({
         projectId: projectId as string,
         userId: req.body.userId,
-        solicitanteId,
+        requesterId,
       });
 
       return res.status(200).json(project);
     } catch (error) {
-      if (error instanceof NoAutorizadoError) {
+      if (error instanceof NotAuthorizedError) {
         return res.status(403).json({ error: error.message });
       }
-      if (error instanceof ProjectNoEncontradoError || error instanceof UsuarioNoEncontradoError) {
+      if (error instanceof ProjectNotFoundError || error instanceof UserNotFoundError) {
         return res.status(404).json({ error: error.message });
       }
       if (error instanceof DomainError) {

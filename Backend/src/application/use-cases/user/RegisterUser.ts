@@ -1,38 +1,38 @@
 import bcrypt from "bcryptjs";
 import { User } from "../../../domain/entities/user.entity.js";
-import { EmailYaRegistradoError } from "../../../domain/errors/UserError.js";
+import { EmailAlreadyRegisteredError } from "../../../domain/errors/UserError.js";
 import type { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
 import { randomUUID } from "crypto";
 import type { IPasswordHasher } from "../../ports/IPasswordHasher.js";
 
-interface RegistrarUsuarioDTO extends Omit<User, "id" | "passwordHash"> {
+interface RegisterUserDTO extends Omit<User, "id" | "passwordHash"> {
   password: string;
 }
 
-export class RegistrarUsuarioUseCase {
+export class RegisterUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordHasher: IPasswordHasher
   ) {}
 
-  async execute(data: RegistrarUsuarioDTO): Promise<User> {
-    const usuarioExiste = await this.userRepository.getByEmail(data.email);
+  async execute(data: RegisterUserDTO): Promise<User> {
+    const existingUser = await this.userRepository.getByEmail(data.email);
 
-    if (usuarioExiste) {
-      throw new EmailYaRegistradoError(data.email);
+    if (existingUser) {
+      throw new EmailAlreadyRegisteredError(data.email);
     }
 
     const passwordHash = await this.passwordHasher.hash(data.password);
 
-    const nuevoUsuario = User.crear({
+    const newUser = User.create({
       id: randomUUID(),
-      nombre: data.nombre,
+      name: data.name,
       email: data.email,
       passwordHash,
-      rol: data.rol ?? "Reporter",
-      fechaCreacion: new Date(),
+      role: data.role ?? "Reporter",
+      createdAt: new Date(),
     });
 
-    return this.userRepository.save(nuevoUsuario);
+    return this.userRepository.save(newUser);
   }
 }

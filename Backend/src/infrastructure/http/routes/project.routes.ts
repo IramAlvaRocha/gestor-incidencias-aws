@@ -1,11 +1,11 @@
 import { Router } from "express";
 import type { ProjectController } from "../controllers/project.controller.js";
-import { autenticate } from "../middlewares/authenticate.js";
+import { authenticate } from "../middlewares/authenticate.js";
 import type { ITokenService } from "../../../application/ports/ITokenService.js";
 import { validate } from "../middlewares/validate.js";
-import { agregarMiembroSchema, crearProjectSchema } from "../validators/project.schema.js";
+import { addMemberSchema, createProjectSchema } from "../validators/project.schema.js";
 
-export const crearProjectRouter = (
+export const createProjectRouter = (
     projectController: ProjectController,
     tokenService: ITokenService
 ):Router => {
@@ -13,22 +13,22 @@ export const crearProjectRouter = (
 
     router.get(
         "/", 
-        autenticate(tokenService),
-        projectController.listar
+        authenticate(tokenService),
+        projectController.getAll
     );
     
     router.post(
         "/", 
-        autenticate(tokenService), 
-        validate(crearProjectSchema),
-        projectController.crear
+        authenticate(tokenService), 
+        validate(createProjectSchema),
+        projectController.create
     );
     
     router.post(
         "/:id/miembros", 
-        autenticate(tokenService), 
-        validate(agregarMiembroSchema), 
-        projectController.agregarMiembroAProyecto
+        authenticate(tokenService), 
+        validate(addMemberSchema), 
+        projectController.addMemberToProject
     )
 
     return router;

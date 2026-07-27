@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { crearServidor } from './infrastructure/http/server.js';
+import { createServer } from './infrastructure/http/server.js';
 
 // Security Ports + Implementaciones
 import { BcryptPasswordHasher } from './infrastructure/security/BcryptPasswordHasher.js'
@@ -8,23 +8,23 @@ import { JsonWebTokenService } from './infrastructure/security/JwtTokenService.j
 //User
 import { UserController } from './infrastructure/http/controllers/user.controller.js';
 import { InMemoryUserRepository } from './infrastructure/repositories/InMemoryUserRepository.js';
-import { RegistrarUsuarioUseCase } from './application/use-cases/user/RegistrarUsuario.js';
-import { ListarUsuariosUseCase } from './application/use-cases/user/ListarUsuarios.js';
+import { RegisterUserUseCase } from './application/use-cases/user/RegisterUser.js';
+import { GetAllUsersUseCase } from './application/use-cases/user/GetAllUsers.js';
 
 //Auth
 import { AuthController } from "./infrastructure/http/controllers/auth.controller.js"
-import { AutenticarUsuarioUseCase } from "./application/use-cases/auth/AutenticarUsuario.js"
+import { AuthenticateUserUseCase } from "./application/use-cases/auth/AuthenticateUser.js"
 
 //Tickets
 import { TicketController } from './infrastructure/http/controllers/ticket.controller.js';
 import { InMemoryTicketRepository } from './infrastructure/repositories/InMemoryTicketRepository.js';
-import { CrearTicketUseCase } from './application/use-cases/tickets/CrearTicket.js';
-import { ObtenerTicketsUseCase } from './application/use-cases/tickets/ObtenerTickets.js';
+import { CreateTicketUseCase } from './application/use-cases/tickets/CreateTicket.js';
+import { GetAllTicketsUseCase } from './application/use-cases/tickets/GetAllTickets.js';
 import { ProjectController } from './infrastructure/http/controllers/project.controller.js';
 import { InMemoryProjectRepository } from './infrastructure/repositories/InMemoryProjectRepository.js';
-import { CrearProjectUseCase } from './application/project/CrearProject.js';
-import { ListarProjectsUseCase } from './application/project/ListarProjects.js';
-import { AgregarMiembroAProject } from './application/project/AgregarMiembroAProject.js';
+import { CreateProjectUseCase } from './application/project/CreateProject.js';
+import { GetAllProjectsUseCase } from './application/project/GetAllProjects.js';
+import { AddMemberToProject } from './application/project/AddMemberToProject.js';
 
 const PORT = process.env.PORT ?? 3000;
 if (!process.env.JWT_SECRET) {
@@ -39,28 +39,28 @@ const tokenService = new JsonWebTokenService(JWT_SECRET, JWT_EXPIRES_IN);
 
 // --- Users ---
 const userRepository = new InMemoryUserRepository();
-const registrarUsuarioUseCase = new RegistrarUsuarioUseCase(userRepository, passwordHasher);
-const listarUsuariosUseCase = new ListarUsuariosUseCase(userRepository);
-const userController = new UserController(registrarUsuarioUseCase, listarUsuariosUseCase);
+const registerUserUseCase = new RegisterUserUseCase(userRepository, passwordHasher);
+const getAllUsersUseCase = new GetAllUsersUseCase(userRepository);
+const userController = new UserController(registerUserUseCase, getAllUsersUseCase);
 
 // --- Auth ---
-const autenticarUsuarioUseCase = new AutenticarUsuarioUseCase(userRepository, passwordHasher, tokenService);
-const authController = new AuthController(autenticarUsuarioUseCase);
+const authenticateUserUseCase = new AuthenticateUserUseCase(userRepository, passwordHasher, tokenService);
+const authController = new AuthController(authenticateUserUseCase);
 
 // --- Tickets ---
 const ticketRepository = new InMemoryTicketRepository();
-const crearIncidenciaUseCase = new CrearTicketUseCase(ticketRepository);
-const obtenerIncidenciasUseCase = new ObtenerTicketsUseCase(ticketRepository);
-const ticketController = new TicketController(crearIncidenciaUseCase, obtenerIncidenciasUseCase);
+const createTicketUseCase = new CreateTicketUseCase(ticketRepository);
+const getAllTicketsUseCase = new GetAllTicketsUseCase(ticketRepository);
+const ticketController = new TicketController(createTicketUseCase, getAllTicketsUseCase);
 
 // --- Projects ---
 const projectRepository = new InMemoryProjectRepository();
-const crearProject = new CrearProjectUseCase(projectRepository);
-const listar = new ListarProjectsUseCase(projectRepository);
-const agregar = new AgregarMiembroAProject(projectRepository,userRepository);
-const projectController = new ProjectController(crearProject,listar,agregar);
+const createProject = new CreateProjectUseCase(projectRepository);
+const getAllProjects = new GetAllProjectsUseCase(projectRepository);
+const addMember = new AddMemberToProject(projectRepository,userRepository);
+const projectController = new ProjectController(createProject,getAllProjects,addMember);
 
-const app = crearServidor({
+const app = createServer({
   ticketController,
   userController,
   authController,

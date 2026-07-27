@@ -9,8 +9,8 @@ export class BcryptPasswordHasher implements IPasswordHasher {
         return bcrypt.hash(password, this.saltRounds);
     }
 
-    comparar(passwordPlano: string, passwordHash: string): Promise<boolean> {
-        return bcrypt.compare(passwordPlano, passwordHash);
+    compare(plainPassword: string, passwordHash: string): Promise<boolean> {
+        return bcrypt.compare(plainPassword, passwordHash);
     }
 
 }
