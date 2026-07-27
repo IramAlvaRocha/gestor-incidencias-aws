@@ -1,7 +1,7 @@
 import {
   EmailInvalidoError,
   NombreInvalidoError,
-} from "../errors/DomainError.js";
+} from "../errors/UserError.js";
 
 export type Rol = "Admin" | "Developer" | "Reporter";
 

@@ -1,6 +1,6 @@
 import { response, type Request, type Response } from "express"
 import type { AutenticarUsuarioUseCase } from "../../../application/use-cases/auth/AutenticarUsuario.js"
-import { CredencialesInvalidasError } from "../../../domain/errors/DomainError.js";
+import { CredencialesInvalidasError } from "../../../domain/errors/UserError.js";
 
 export class AuthController {
     constructor(

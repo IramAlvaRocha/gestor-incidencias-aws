@@ -1,5 +1,5 @@
 import type { Rol } from "../../../domain/entities/user.entity.js";
-import { CredencialesInvalidasError } from "../../../domain/errors/DomainError.js";
+import { CredencialesInvalidasError } from "../../../domain/errors/UserError.js";
 import type { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
 import type { IPasswordHasher } from "../../ports/IPasswordHasher.js";
 import type { ITokenService } from "../../ports/ITokenService.js";

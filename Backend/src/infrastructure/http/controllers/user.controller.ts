@@ -3,10 +3,8 @@ import type { User } from "../../../domain/entities/user.entity.js";
 import type { RegistrarUsuarioUseCase } from "../../../application/use-cases/user/RegistrarUsuario.js";
 import type { ListarUsuariosUseCase } from "../../../application/use-cases/user/ListarUsuarios.js";
 import type { Response, Request } from "express";
-import {
-  DomainError,
-  EmailYaRegistradoError,
-} from "../../../domain/errors/DomainError.js";
+import { DomainError } from "../../../domain/errors/DomainError.js";
+import { EmailYaRegistradoError } from "../../../domain/errors/UserError.js";
 
 const toUserResponse = (user: User) => ({
   id: user.id,

@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { User } from "../../../domain/entities/user.entity.js";
-import { EmailYaRegistradoError } from "../../../domain/errors/DomainError.js";
+import { EmailYaRegistradoError } from "../../../domain/errors/UserError.js";
 import type { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
 import { randomUUID } from "crypto";
 import type { IPasswordHasher } from "../../ports/IPasswordHasher.js";
