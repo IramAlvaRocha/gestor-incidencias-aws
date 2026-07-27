@@ -6,5 +6,5 @@ export interface ITicketRepository {
     update(ticket: Ticket): Promise<Ticket>;
     getAll(): Promise<Ticket[]>;
     getById(id: string): Promise<Ticket | null>;
-    countByIdProjet(projectId: string): Promise<number>;
+    countByProjectId(projectId: string): Promise<number>;
 }

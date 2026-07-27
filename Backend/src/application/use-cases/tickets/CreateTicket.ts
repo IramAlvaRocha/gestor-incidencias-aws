@@ -27,7 +27,7 @@ export class CreateTicketUseCase {
 
         if(!project.isMember(data.reporterId)) throw new MemberNotInProject();
 
-        const totalTickets = await this.ticketRepository.countByIdProjet(data.projectId);
+        const totalTickets = await this.ticketRepository.countByProjectId(data.projectId);
         const id = randomUUID();
         const key = `${project.key}-${totalTickets + 1}`;
         const now = new Date();

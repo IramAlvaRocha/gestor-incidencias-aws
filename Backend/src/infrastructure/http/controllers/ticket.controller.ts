@@ -16,7 +16,7 @@ export class TicketController {
     return res.status(400).json({ errors: result.error.flatten().fieldErrors });
   }
 
-  const { title, description, priority } = result.data;
+  const { title, description, priority, projectId, type } = result.data;
   const reporterId = req.authenticatedUser?.userId;
 
   if (!reporterId) {
@@ -28,6 +28,8 @@ export class TicketController {
     description,
     priority,
     reporterId,
+    projectId,
+    type: type ?? "Tarea",
   });
 
   return res.status(201).json(ticket);

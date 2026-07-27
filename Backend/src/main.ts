@@ -47,18 +47,18 @@ const userController = new UserController(registerUserUseCase, getAllUsersUseCas
 const authenticateUserUseCase = new AuthenticateUserUseCase(userRepository, passwordHasher, tokenService);
 const authController = new AuthController(authenticateUserUseCase);
 
-// --- Tickets ---
-const ticketRepository = new InMemoryTicketRepository();
-const createTicketUseCase = new CreateTicketUseCase(ticketRepository);
-const getAllTicketsUseCase = new GetAllTicketsUseCase(ticketRepository);
-const ticketController = new TicketController(createTicketUseCase, getAllTicketsUseCase);
-
 // --- Projects ---
 const projectRepository = new InMemoryProjectRepository();
 const createProject = new CreateProjectUseCase(projectRepository);
 const getAllProjects = new GetAllProjectsUseCase(projectRepository);
 const addMember = new AddMemberToProject(projectRepository,userRepository);
 const projectController = new ProjectController(createProject,getAllProjects,addMember);
+
+// --- Tickets ---
+const ticketRepository = new InMemoryTicketRepository();
+const createTicketUseCase = new CreateTicketUseCase(ticketRepository, projectRepository);
+const getAllTicketsUseCase = new GetAllTicketsUseCase(ticketRepository);
+const ticketController = new TicketController(createTicketUseCase, getAllTicketsUseCase);
 
 const app = createServer({
   ticketController,

@@ -25,7 +25,7 @@ export class InMemoryTicketRepository implements ITicketRepository {
     return ticket;
   }
 
-  async countByIdProjet(projectId: string): Promise<number> {
+  async countByProjectId(projectId: string): Promise<number> {
     return this.tickets.filter((t) => t.projectId === projectId).length;
   }
 }
