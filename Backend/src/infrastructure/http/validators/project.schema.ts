@@ -1,11 +1,11 @@
 import z from "zod";
 
 export const createProjectSchema = z.object({
-    name: z.string().min(3, "El nombre debe tener al menos tres caracteres"),
-    key: z.string().min(2).max(10, "El key debe tener entre dos y diez caracteres"),
-    description: z.string().min(5, "La descripción debe tener al menos cinco caracteres")
+    name: z.string().min(3, "Name must be at least three characters"),
+    key: z.string().min(2).max(10, "Key must be between two and ten characters"),
+    description: z.string().min(5, "Description must be at least five characters")
 });
 
 export const addMemberSchema = z.object({
-    userId: z.uuid("El userId debe ser un UUID válido")
+    userId: z.uuid("userId must be a valid UUID")
 });

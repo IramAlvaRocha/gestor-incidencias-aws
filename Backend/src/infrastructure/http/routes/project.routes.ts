@@ -25,7 +25,7 @@ export const createProjectRouter = (
     );
     
     router.post(
-        "/:id/miembros", 
+        "/:id/members", 
         authenticate(tokenService), 
         validate(addMemberSchema), 
         projectController.addMemberToProject

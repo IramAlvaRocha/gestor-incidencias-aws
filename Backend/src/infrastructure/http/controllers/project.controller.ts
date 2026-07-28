@@ -1,54 +1,40 @@
-import { CreateProjectUseCase } from '../../../application/project/CreateProject.js';
-import type {Response, Request} from "express"
-import { DuplicateKeyError, InvalidProjectKeyError, NotAuthorizedError, ProjectNotFoundError, UserNotFoundError } from '../../../domain/errors/ProjectError.js';
-import { DomainError } from '../../../domain/errors/DomainError.js';
-import type { GetAllProjectsUseCase } from '../../../application/project/GetAllProjects.js';
-import type { AddMemberToProject } from '../../../application/project/AddMemberToProject.js';
+import type { CreateProjectUseCase } from "../../../application/use-cases/project/CreateProject.js";
+import type { Response, Request } from "express";
+import type { GetAllProjectsUseCase } from "../../../application/use-cases/project/GetAllProjects.js";
+import type { AddMemberToProject } from "../../../application/use-cases/project/AddMemberToProject.js";
+import { handleControllerError } from "../errors/handleControllerError.js";
+
 export class ProjectController {
-    constructor(
-        private readonly createProject: CreateProjectUseCase,
-        private readonly getAllProjects: GetAllProjectsUseCase,
-        private readonly addMemberToProjectUseCase: AddMemberToProject,
-    ){}
+  constructor(
+    private readonly createProject: CreateProjectUseCase,
+    private readonly getAllProjects: GetAllProjectsUseCase,
+    private readonly addMemberToProjectUseCase: AddMemberToProject,
+  ) {}
 
-    create = async(req: Request, res: Response) => {
-        try {
-            const ownerId = req.authenticatedUser?.userId;
+  create = async (req: Request, res: Response) => {
+    try {
+      const ownerId = req.authenticatedUser?.userId;
 
-            if (!ownerId) {
-                return res.status(401).json({ error: 'Usuario no autenticado' });
-            }
+      if (!ownerId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
 
-            const project = await this.createProject.execute({
-                ...req.body,
-                ownerId,
-            });
+      const project = await this.createProject.execute({
+        ...req.body,
+        ownerId,
+      });
 
-            return res.status(201).json(project);
-
-        } catch (error) {
-            
-            if(error instanceof DuplicateKeyError)
-                return res.status(409).json({ error: error.message })
-
-            if(error instanceof InvalidProjectKeyError) 
-                return res.status(400).json({error: error.message})
-
-            if(error instanceof DomainError)
-                return res.status(409).json({
-                    error: error.message
-            })
-
-            console.log(error)
-
-            return res.status(500).json({
-                error: "Error interno al crear un proyecto"
-            })
-
-        }
+      return res.status(201).json(project);
+    } catch (error) {
+      return handleControllerError(
+        res,
+        error,
+        "Internal error while creating a project",
+      );
     }
+  };
 
-    getAll = async (_req: Request, res: Response) => {
+  getAll = async (_req: Request, res: Response) => {
     const projects = await this.getAllProjects.execute();
     return res.status(200).json(projects);
   };
@@ -66,18 +52,11 @@ export class ProjectController {
 
       return res.status(200).json(project);
     } catch (error) {
-      if (error instanceof NotAuthorizedError) {
-        return res.status(403).json({ error: error.message });
-      }
-      if (error instanceof ProjectNotFoundError || error instanceof UserNotFoundError) {
-        return res.status(404).json({ error: error.message });
-      }
-      if (error instanceof DomainError) {
-        return res.status(400).json({ error: error.message });
-      }
-      console.error(error);
-      return res.status(500).json({ error: 'Error interno al agregar miembro' });
+      return handleControllerError(
+        res,
+        error,
+        "Internal error while adding member",
+      );
     }
   };
-
 }

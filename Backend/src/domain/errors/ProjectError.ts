@@ -2,25 +2,25 @@ import { DomainError } from "./DomainError.js";
 
 export class InvalidProjectNameError extends DomainError {
     constructor(){
-        super("El nombre del proyecto no es válido.")
+        super("Project name is not valid.")
     }
 }
 
 export class InvalidProjectKeyError extends DomainError {
     constructor(){
-        super('El key del proyecto debe tener entre 2 y 10 letras mayúsculas (ej: PROJ)');
+        super('Project key must be between 2 and 10 uppercase letters (e.g. PROJ)');
     }
 }
 
 export class DuplicateKeyError extends DomainError {
     constructor(key: string) {
-        super(`El key "${key}" ya está en uso en otro proyecto`);
+        super(`Key "${key}" is already in use by another project`);
     }
 }
 
 export class MemberAlreadyExistsError extends DomainError {
   constructor(userId: string) {
-    super(`El usuario "${userId}" ya es miembro de este proyecto`);
+    super(`User "${userId}" is already a member of this project`);
   }
 }
 
@@ -28,18 +28,29 @@ export class ProjectNotFoundError extends DomainError {
     constructor(
         projectId: string
     ) {
-        super(`No se encontro el proyecto con el id ${projectId}`)
+        super(`Project with id ${projectId} was not found`)
     }
 }
 
 export class NotAuthorizedError extends DomainError{
     constructor() {
-        super("Solo el propietario del proyecto puede agregar miembros")
+        super("Only the project owner can add members")
     }
 } 
 
 export class UserNotFoundError extends DomainError {
     constructor(userId: string) {
-        super(`No se encontro el usuario con el id ${userId}`)
+        super(`User with id ${userId} was not found`)
+    }
+}
+export class MemberNotInProject extends DomainError {
+    constructor() {
+        super("You must be a project member to perform this action.")
+    }
+}
+
+export class AssigneeNotInProjectError extends DomainError {
+    constructor() {
+        super("Assignee must be a member of the project.")
     }
 }

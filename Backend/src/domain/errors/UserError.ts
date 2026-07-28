@@ -2,25 +2,25 @@ import { DomainError } from "./DomainError.js";
 
 export class InvalidEmailError extends DomainError {
     constructor(email: string){
-        super(`El email ${email} no tiene un formato válido`);
+        super(`Email ${email} does not have a valid format`);
     }
 }
 
 export class InvalidNameError extends DomainError {
     constructor(){
-        super(`El nombre debe tener al menos dos caracteres`);
+        super(`Name must be at least two characters long`);
     }
 }
 
 export class EmailAlreadyRegisteredError extends DomainError {
   constructor(email: string) {
-    super(`El email "${email}" ya está registrado`);
+    super(`Email "${email}" is already registered`);
   }
 }
 
 export class InvalidCredentialsError extends DomainError {
     constructor(
     ){
-        super('Email o contraseña incorrectos.')
+        super('Incorrect email or password.')
     }
 }

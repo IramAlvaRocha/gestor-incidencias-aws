@@ -11,7 +11,7 @@ import {  createTicketRouter } from './routes/ticket.routes.js';
 import { createUserRouter } from './routes/user.routes.js';
 import { createAuthRouter } from './routes/auth.routes.js';
 
-// Ports (para poder construir el middleware de autenticación aquí)
+// Ports (needed to build the authentication middleware here)
 import { type ITokenService } from '../../application/ports/ITokenService.js';
 import { createProjectRouter } from './routes/project.routes.js';
 import { ProjectController } from './controllers/project.controller.js';
@@ -37,10 +37,10 @@ export const createServer = ({
   app.use(cors());
   app.use(express.json());
 
-  // Rutas públicas
+  // Public routes
   app.use('/api/auth', createAuthRouter(authController));
 
-  // Rutas que pueden tener endpoints protegidos internamente
+  // Routes that may have internally protected endpoints
   app.use('/api/users', createUserRouter(userController, tokenService));
   app.use('/api/tickets', createTicketRouter(ticketController, tokenService));
   app.use('/api/projects', createProjectRouter(projectController, tokenService));

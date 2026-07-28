@@ -7,7 +7,7 @@ export const authenticate = (tokenService: ITokenService) =>
         const authHeader = req.headers.authorization;
         
         if(!authHeader || !authHeader.startsWith('Bearer ')){
-            return res.status(401).json({ error: 'Token no proporcionado' })
+            return res.status(401).json({ error: 'Token not provided' })
         }
 
         const token = authHeader.split(" ")[1];
@@ -17,6 +17,6 @@ export const authenticate = (tokenService: ITokenService) =>
             req.authenticatedUser = payload;
             next();
         } catch (error) {
-            return res.status(401).json({ error: 'Token inválido o expirado' }); 
+            return res.status(401).json({ error: 'Invalid or expired token' }); 
         }
 }

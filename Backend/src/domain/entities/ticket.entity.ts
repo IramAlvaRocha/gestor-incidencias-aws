@@ -1,12 +1,12 @@
 import { InvalidDescriptionError, InvalidTitleError } from "../errors/TicketError.js";
 
-export type TicketStatus = "Abierto" | "En Progreso" | "Cerrado";
-export type Priority = "Baja" | "Media" | "Alta";
-export type TicketType = "Bug" | "Tarea" | "Historia" | "Mejora"
+export type TicketStatus = "Open" | "In Progress" | "Closed";
+export type Priority = "Low" | "Medium" | "High";
+export type TicketType = "Bug" | "Task" | "Story" | "Improvement";
 
 interface CreateTicketProps {
-  key: string;
   id: string;
+  key: string;
   title: string;
   description: string;
   type: TicketType;
@@ -30,32 +30,34 @@ export class Ticket {
     public assigneeId: string | null,
     public readonly attachments: string[],
     public readonly createdAt: Date,
-    public updatedAt: Date
+    public updatedAt: Date,
   ) {}
 
   static create(props: CreateTicketProps): Ticket {
-    if(!props.title) throw new InvalidTitleError();
-    if(!props.description) throw new InvalidDescriptionError();
+    const title = props.title.trim();
+    const description = props.description.trim();
+
+    if (title.length < 3) throw new InvalidTitleError();
+    if (description.length < 20) throw new InvalidDescriptionError();
 
     return new Ticket(
-        props.id,
-        props.key,
-        props.title.trim(),
-        props.description.trim(),
-        props.type,
-        props.priority,
-        'Abierto',
-        props.projectId,
-        props.reporterId,
-        null,
-        [],
-        props.createdAt,
-        props.createdAt
-      );
+      props.id,
+      props.key,
+      title,
+      description,
+      props.type,
+      props.priority,
+      "Open",
+      props.projectId,
+      props.reporterId,
+      null,
+      [],
+      props.createdAt,
+      props.createdAt,
+    );
+  }
 
-    }
-
-    changeStatus(newStatus: TicketStatus): void {
+  changeStatus(newStatus: TicketStatus): void {
     this.status = newStatus;
     this.updatedAt = new Date();
   }

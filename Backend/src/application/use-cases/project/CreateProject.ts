@@ -1,6 +1,6 @@
-import { Project } from "../../domain/entities/project.entity.js";
-import { DuplicateKeyError, InvalidProjectKeyError } from "../../domain/errors/ProjectError.js";
-import type { IProjectRepository } from "../../domain/repositories/IProjectRepository.js";
+import { Project } from "../../../domain/entities/project.entity.js";
+import { DuplicateKeyError, InvalidProjectKeyError } from "../../../domain/errors/ProjectError.js";
+import type { IProjectRepository } from "../../../domain/repositories/IProjectRepository.js";
 import { randomUUID } from "crypto";
 
 interface CreateProjectDTO {
