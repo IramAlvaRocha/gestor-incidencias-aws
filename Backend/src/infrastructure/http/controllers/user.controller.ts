@@ -33,7 +33,7 @@ export class UserController {
       console.error(error);
       return res
         .status(500)
-        .json({ error: "Error interno al registrar usuario" });
+        .json({ error: "Internal error while registering user" });
     }
   };
 

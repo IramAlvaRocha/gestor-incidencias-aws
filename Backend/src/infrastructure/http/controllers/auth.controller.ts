@@ -22,7 +22,7 @@ export class AuthController {
                 })
             }
             return res.status(401).json({
-                error: "Ocurrio un problema al intentar autenticar"
+                error: "An error occurred while trying to authenticate"
             })
         }
     }

@@ -16,7 +16,7 @@ export class ProjectController {
             const ownerId = req.authenticatedUser?.userId;
 
             if (!ownerId) {
-                return res.status(401).json({ error: 'Usuario no autenticado' });
+                return res.status(401).json({ error: 'User not authenticated' });
             }
 
             const project = await this.createProject.execute({
@@ -42,7 +42,7 @@ export class ProjectController {
             console.log(error)
 
             return res.status(500).json({
-                error: "Error interno al crear un proyecto"
+                error: "Internal error while creating a project"
             })
 
         }
@@ -76,7 +76,7 @@ export class ProjectController {
         return res.status(400).json({ error: error.message });
       }
       console.error(error);
-      return res.status(500).json({ error: 'Error interno al agregar miembro' });
+      return res.status(500).json({ error: 'Internal error while adding member' });
     }
   };
 

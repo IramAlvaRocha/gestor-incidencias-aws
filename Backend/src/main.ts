@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { createServer } from './infrastructure/http/server.js';
 
-// Security Ports + Implementaciones
+// Security Ports + Implementations
 import { BcryptPasswordHasher } from './infrastructure/security/BcryptPasswordHasher.js'
 import { JsonWebTokenService } from './infrastructure/security/JwtTokenService.js'
 
@@ -25,12 +25,14 @@ import { InMemoryProjectRepository } from './infrastructure/repositories/InMemor
 import { CreateProjectUseCase } from './application/use-cases/project/CreateProject.js';
 import { GetAllProjectsUseCase } from './application/use-cases/project/GetAllProjects.js';
 import { AddMemberToProject } from './application/use-cases/project/AddMemberToProject.js';
+import { AssignTicketUseCase } from './application/use-cases/tickets/AssignTicket.js';
+import { ChangeStatusTicketUseCase } from './application/use-cases/tickets/ChangeStatusTicket.js';
 
 const PORT = process.env.PORT ?? 3000;
 if (!process.env.JWT_SECRET) {
-  console.warn('⚠️  JWT_SECRET no definido en .env. Usando fallback inseguro para desarrollo.');
+  console.warn('⚠️  JWT_SECRET not defined in .env. Using insecure fallback for development.');
 }
-const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret-no-usar-en-produccion';
+const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret-do-not-use-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '1h';
 
 // --- Security ---
@@ -58,16 +60,18 @@ const projectController = new ProjectController(createProject,getAllProjects,add
 const ticketRepository = new InMemoryTicketRepository();
 const createTicketUseCase = new CreateTicketUseCase(ticketRepository, projectRepository);
 const getAllTicketsUseCase = new GetAllTicketsUseCase(ticketRepository);
-const ticketController = new TicketController(createTicketUseCase, getAllTicketsUseCase);
+const assingTicketsUseCase = new AssignTicketUseCase(ticketRepository, projectRepository);
+const changeStatusUseCase = new ChangeStatusTicketUseCase(ticketRepository);
+const ticketController = new TicketController(createTicketUseCase, getAllTicketsUseCase, assingTicketsUseCase,changeStatusUseCase);
 
 const app = createServer({
   ticketController,
   userController,
   authController,
   projectController,
-  tokenService, // lo pasamos para poder usarlo en middlewares de rutas protegidas
+  tokenService, // passed so it can be used in protected route middlewares
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

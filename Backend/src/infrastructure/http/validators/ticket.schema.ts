@@ -1,11 +1,11 @@
 import { z } from "zod"
 
 export const createTicketSchema = z.object({
-    title: z.string().min(3, "El título debe tener al menos 3 caracteres"),
-    description: z.string().min(20, "La descripción debe tener al menos 20 caracteres"),
-    type: z.enum(['Bug', 'Tarea', 'Historia', 'Mejora']).optional(),
-    priority: z.enum(['Baja', 'Media', 'Alta']).optional(),
-    projectId: z.string().uuid("El projectId debe ser un UUID válido"),
+    title: z.string().min(3, "Title must be at least 3 characters"),
+    description: z.string().min(20, "Description must be at least 20 characters"),
+    type: z.enum(['Bug', 'Task', 'Story', 'Improvement']).optional(),
+    priority: z.enum(['Low', 'Medium', 'High']).optional(),
+    projectId: z.string().uuid("projectId must be a valid UUID"),
 })
 
 export const changeStatusSchema = z.object({

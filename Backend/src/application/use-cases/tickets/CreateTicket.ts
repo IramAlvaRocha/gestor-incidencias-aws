@@ -38,7 +38,7 @@ export class CreateTicketUseCase {
             title: data.title,
             description: data.description,
             type: data.type,
-            priority: data.priority ?? "Baja",
+            priority: data.priority ?? "Low",
             reporterId: data.reporterId,
             projectId: data.projectId ?? "default",
             createdAt: now,

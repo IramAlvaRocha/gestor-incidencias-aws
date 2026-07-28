@@ -1,8 +1,8 @@
 import { InvalidDescriptionError, InvalidTitleError } from "../errors/TicketError.js";
 
-export type TicketStatus = "Abierto" | "En Progreso" | "Cerrado";
-export type Priority = "Baja" | "Media" | "Alta";
-export type TicketType = "Bug" | "Tarea" | "Historia" | "Mejora"
+export type TicketStatus = "Open" | "In Progress" | "Closed";
+export type Priority = "Low" | "Medium" | "High";
+export type TicketType = "Bug" | "Task" | "Story" | "Improvement"
 
 interface CreateTicketProps {
   id: string;
@@ -44,7 +44,7 @@ export class Ticket {
         props.description.trim(),
         props.type,
         props.priority,
-        'Abierto',
+        'Open',
         props.projectId,
         props.reporterId,
         null,

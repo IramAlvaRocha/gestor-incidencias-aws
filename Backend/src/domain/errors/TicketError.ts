@@ -2,18 +2,18 @@ import { DomainError } from "./DomainError.js";
 
 export class InvalidTitleError extends DomainError {
     constructor() {
-        super("El título del ticket no es válido.")
+        super("Ticket title is not valid.")
     }
 }
 
 export class InvalidDescriptionError extends DomainError {
     constructor() {
-        super("La descripción del ticket no es válida.")
+        super("Ticket description is not valid.")
     }
 }
 
 export class TicketNotFoundError extends DomainError {
     constructor() {
-        super("No se encontró un ticket con el id proporcionado")
+        super("No ticket was found with the provided id")
     }
 }
