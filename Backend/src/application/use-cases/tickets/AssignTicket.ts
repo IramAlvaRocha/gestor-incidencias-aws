@@ -1,3 +1,5 @@
+import { MemberNotInProject } from "../../../domain/errors/ProjectError.js";
+import { TicketNotFoundError } from "../../../domain/errors/TicketError.js";
 import type { IProjectRepository } from "../../../domain/repositories/IProjectRepository.js";
 import type { ITicketRepository } from "../../../domain/repositories/ITicketRepository.js";
 
@@ -16,7 +18,15 @@ export class AssignTicketUseCase {
 
     const ticket = await this.ticketRepository.getById(data.ticketId);
 
-    // if(!ticket) throw new NotFoundTicketError();
+    if(!ticket) throw new TicketNotFoundError();
+
+    const project = await this.projectRepository.getById(ticket.projectId);
+
+    if(!project || !project.isMember(data.assigneeId)) throw new MemberNotInProject();
+
+    ticket.assignTo(data.assigneeId);
+
+    return this.ticketRepository.update(ticket); 
 
   }
 }

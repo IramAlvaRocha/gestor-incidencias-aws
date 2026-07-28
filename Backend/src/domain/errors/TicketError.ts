@@ -12,3 +12,8 @@ export class InvalidDescriptionError extends DomainError {
     }
 }
 
+export class TicketNotFoundError extends DomainError {
+    constructor() {
+        super("No se encontró un ticket con el id proporcionado")
+    }
+}
