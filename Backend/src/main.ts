@@ -60,9 +60,14 @@ const projectController = new ProjectController(createProject,getAllProjects,add
 const ticketRepository = new InMemoryTicketRepository();
 const createTicketUseCase = new CreateTicketUseCase(ticketRepository, projectRepository);
 const getAllTicketsUseCase = new GetAllTicketsUseCase(ticketRepository);
-const assingTicketsUseCase = new AssignTicketUseCase(ticketRepository, projectRepository);
+const assignTicketUseCase = new AssignTicketUseCase(ticketRepository, projectRepository);
 const changeStatusUseCase = new ChangeStatusTicketUseCase(ticketRepository);
-const ticketController = new TicketController(createTicketUseCase, getAllTicketsUseCase, assingTicketsUseCase,changeStatusUseCase);
+const ticketController = new TicketController(
+  createTicketUseCase,
+  getAllTicketsUseCase,
+  assignTicketUseCase,
+  changeStatusUseCase,
+);
 
 const app = createServer({
   ticketController,

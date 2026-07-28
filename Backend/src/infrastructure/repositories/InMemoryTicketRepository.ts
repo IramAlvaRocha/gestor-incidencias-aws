@@ -13,8 +13,8 @@ export class InMemoryTicketRepository implements ITicketRepository {
   }
 
   async getById(id: string): Promise<Ticket | null> {
-    const project = this.tickets.find((t) => t.id === id);
-    return project ?? null;
+    const ticket = this.tickets.find((t) => t.id === id);
+    return ticket ?? null;
   }
 
   async update(ticket: Ticket): Promise<Ticket> {

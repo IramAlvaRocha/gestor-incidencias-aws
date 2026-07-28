@@ -2,13 +2,13 @@ import { DomainError } from "./DomainError.js";
 
 export class InvalidTitleError extends DomainError {
     constructor() {
-        super("Ticket title is not valid.")
+        super("Ticket title must be at least 3 characters.")
     }
 }
 
 export class InvalidDescriptionError extends DomainError {
     constructor() {
-        super("Ticket description is not valid.")
+        super("Ticket description must be at least 20 characters.")
     }
 }
 

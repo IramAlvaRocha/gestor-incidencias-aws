@@ -2,8 +2,7 @@ import type { User } from "../../../domain/entities/user.entity.js";
 import type { RegisterUserUseCase } from "../../../application/use-cases/user/RegisterUser.js";
 import type { GetAllUsersUseCase } from "../../../application/use-cases/user/GetAllUsers.js";
 import type { Response, Request } from "express";
-import { DomainError } from "../../../domain/errors/DomainError.js";
-import { EmailAlreadyRegisteredError } from "../../../domain/errors/UserError.js";
+import { handleControllerError } from "../errors/handleControllerError.js";
 
 const toUserResponse = (user: User) => ({
   id: user.id,
@@ -24,24 +23,16 @@ export class UserController {
       const user = await this.registerUserUseCase.execute(req.body);
       return res.status(201).json(toUserResponse(user));
     } catch (error) {
-      if (error instanceof EmailAlreadyRegisteredError) {
-        return res.status(409).json({ error: error.message });
-      }
-      if (error instanceof DomainError) {
-        return res.status(400).json({ error: error.message });
-      }
-      console.error(error);
-      return res
-        .status(500)
-        .json({ error: "Internal error while registering user" });
+      return handleControllerError(
+        res,
+        error,
+        "Internal error while registering user",
+      );
     }
   };
 
-  getAll = async(req: Request, res: Response) => {
-    
-
-    const users = await this.getAllUsersUseCase.execute()
-
-    return res.status(200).json(users.map(toUserResponse))
-  }
+  getAll = async (_req: Request, res: Response) => {
+    const users = await this.getAllUsersUseCase.execute();
+    return res.status(200).json(users.map(toUserResponse));
+  };
 }

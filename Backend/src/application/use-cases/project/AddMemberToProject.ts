@@ -22,9 +22,9 @@ export class AddMemberToProject {
 
         if(!project.isOwner(data.requesterId)) throw new NotAuthorizedError();
 
-        const existeUsuario = await this.userRepository.getUserById(data.userId)
+        const user = await this.userRepository.getUserById(data.userId)
         
-        if(!existeUsuario) throw new UserNotFoundError(data.userId);
+        if(!user) throw new UserNotFoundError(data.userId);
 
         project.addMember(data.userId);
 

@@ -45,6 +45,12 @@ export class UserNotFoundError extends DomainError {
 }
 export class MemberNotInProject extends DomainError {
     constructor() {
-        super("You must be a project member to create tickets.")
+        super("You must be a project member to perform this action.")
+    }
+}
+
+export class AssigneeNotInProjectError extends DomainError {
+    constructor() {
+        super("Assignee must be a member of the project.")
     }
 }

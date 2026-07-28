@@ -3,8 +3,7 @@ import type { CreateTicketUseCase } from "../../../application/use-cases/tickets
 import type { GetAllTicketsUseCase } from "../../../application/use-cases/tickets/GetAllTickets.js";
 import type { AssignTicketUseCase } from "../../../application/use-cases/tickets/AssignTicket.js";
 import type { ChangeStatusTicketUseCase } from "../../../application/use-cases/tickets/ChangeStatusTicket.js";
-import { MemberNotInProject } from "../../../domain/errors/ProjectError.js";
-import { DomainError } from "../../../domain/errors/DomainError.js";
+import { handleControllerError } from "../errors/handleControllerError.js";
 
 export class TicketController {
   constructor(
@@ -23,15 +22,11 @@ export class TicketController {
       });
       return res.status(201).json(ticket);
     } catch (error) {
-      if (error instanceof MemberNotInProject || error instanceof DomainError) {
-        return res.status(400).json({
-          error: error.message,
-        });
-      }
-      console.error(error);
-      return res
-        .status(400)
-        .json({ error: "Internal error while creating the ticket" });
+      return handleControllerError(
+        res,
+        error,
+        "Internal error while creating the ticket",
+      );
     }
   };
 
@@ -43,23 +38,17 @@ export class TicketController {
   assign = async (req: Request, res: Response) => {
     try {
       const { id: ticketId } = req.params;
-
       const ticket = await this.assignTicketUseCase.execute({
         ticketId: ticketId as string,
         assigneeId: req.body.assigneeId,
       });
-
       return res.status(200).json(ticket);
     } catch (error) {
-      if (error instanceof MemberNotInProject || error instanceof DomainError) {
-        return res.status(400).json({
-          error: error.message,
-        });
-      }
-      console.error(error);
-      return res.status(400).json({
-        error: "Internal error while assigning the ticket",
-      });
+      return handleControllerError(
+        res,
+        error,
+        "Internal error while assigning the ticket",
+      );
     }
   };
 
@@ -70,20 +59,13 @@ export class TicketController {
         ticketId: ticketId as string,
         newStatus: req.body.status,
       });
-
       return res.status(200).json(ticket);
     } catch (error) {
-      if (error instanceof DomainError) {
-        return res.status(400).json({ error: error.message });
-      }
-
-      console.log(error);
-
-      return res
-        .status(400)
-        .json({
-          error: "Internal error while changing the ticket status",
-        });
+      return handleControllerError(
+        res,
+        error,
+        "Internal error while changing the ticket status",
+      );
     }
   };
 }

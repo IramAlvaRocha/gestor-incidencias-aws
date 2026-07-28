@@ -4,12 +4,12 @@ import type { ITicketRepository } from "../../../domain/repositories/ITicketRepo
 import type { IProjectRepository } from "../../../domain/repositories/IProjectRepository.js";
 import { MemberNotInProject, ProjectNotFoundError } from "../../../domain/errors/ProjectError.js";
 
-interface CreateTicketDTO { 
+interface CreateTicketDTO {
     title: string;
     description: string;
-    priority?: Priority | undefined;
+    priority?: Priority;
     reporterId: string;
-    type: TicketType;
+    type?: TicketType;
     projectId: string;
 }
 
@@ -37,10 +37,10 @@ export class CreateTicketUseCase {
             key,
             title: data.title,
             description: data.description,
-            type: data.type,
+            type: data.type ?? "Task",
             priority: data.priority ?? "Low",
             reporterId: data.reporterId,
-            projectId: data.projectId ?? "default",
+            projectId: data.projectId,
             createdAt: now,
         })
 
