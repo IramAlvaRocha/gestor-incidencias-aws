@@ -16,6 +16,22 @@ interface CreateTicketProps {
   createdAt: Date;
 }
 
+interface ReconstructTicketProps {
+  id: string;
+  key: string;
+  title: string;
+  description: string;
+  type: TicketType;
+  priority: Priority;
+  status: TicketStatus;
+  projectId: string;
+  reporterId: string;
+  assigneeId: string | null;
+  attachments: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class Ticket {
   private constructor(
     public readonly id: string,
@@ -54,6 +70,24 @@ export class Ticket {
       [],
       props.createdAt,
       props.createdAt,
+    );
+  }
+
+  static reconstruct(props: ReconstructTicketProps): Ticket {
+    return new Ticket(
+      props.id,
+      props.key,
+      props.title,
+      props.description,
+      props.type,
+      props.priority,
+      props.status,
+      props.projectId,
+      props.reporterId,
+      props.assigneeId,
+      props.attachments,
+      props.createdAt,
+      props.updatedAt,
     );
   }
 

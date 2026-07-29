@@ -9,8 +9,18 @@ interface CreateProjectProps {
     createdAt: Date
 }
 
+interface ReconstructProjectProps {
+    id: string;
+    name: string;
+    key: string;
+    description: string;
+    ownerId: string;
+    members: string[];
+    createdAt: Date;
+}
+
 export class Project {
-    constructor(
+    private constructor(
         public readonly id: string,
         public readonly name: string,
         public readonly key: string,
@@ -36,6 +46,18 @@ export class Project {
             [props.ownerId],
             props.createdAt
         )
+    }
+
+    static reconstruct(props: ReconstructProjectProps): Project {
+        return new Project(
+            props.id,
+            props.name,
+            props.key,
+            props.description,
+            props.ownerId,
+            props.members,
+            props.createdAt,
+        );
     }
 
     isOwner(userId: string): boolean {

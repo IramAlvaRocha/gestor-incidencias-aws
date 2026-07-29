@@ -14,8 +14,17 @@ interface CreateUserProps {
   createdAt: Date;
 }
 
+interface ReconstructUserProps {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  role: Role;
+  createdAt: Date;
+}
+
 export class User {
-  constructor(
+  private constructor(
     public readonly id: string,
     public readonly name: string,
     public readonly email: string,
@@ -42,6 +51,17 @@ export class User {
       props.role,
       props.createdAt,
     );
+  }
+
+  static reconstruct(props: ReconstructUserProps): User {
+    return new User(
+      props.id,
+      props.name.trim(),
+      props.email.toLowerCase(),
+      props.passwordHash,
+      props.role,
+      props.createdAt,
+    )
   }
 
   private static isValidEmail(email: string): boolean {
