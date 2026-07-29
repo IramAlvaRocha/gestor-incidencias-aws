@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import { env } from './config/env.js';
 import { createServer } from './infrastructure/http/server.js';
 
 // Security Ports + Implementations
@@ -28,12 +28,9 @@ import { AddMemberToProject } from './application/use-cases/project/AddMemberToP
 import { AssignTicketUseCase } from './application/use-cases/tickets/AssignTicket.js';
 import { ChangeStatusTicketUseCase } from './application/use-cases/tickets/ChangeStatusTicket.js';
 
-const PORT = process.env.PORT ?? 3000;
-if (!process.env.JWT_SECRET) {
-  console.warn('⚠️  JWT_SECRET not defined in .env. Using insecure fallback for development.');
-}
-const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret-do-not-use-in-production';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '1h';
+const PORT = env.PORT;
+const JWT_SECRET = env.JWT_SECRET;
+const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN;
 
 // --- Security ---
 const passwordHasher = new BcryptPasswordHasher();
