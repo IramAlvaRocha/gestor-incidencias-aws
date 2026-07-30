@@ -13,9 +13,9 @@ interface CreateCommentProps {
 
 export class CreateCommentUseCase {
     constructor(
+        private readonly commentRepository: ICommentRepository,
         private readonly ticketRepository: ITicketRepository,
         private readonly projectRepository: IProjectRepository,
-        private readonly commentRepository: ICommentRepository,
     ){
 
     }
@@ -38,5 +38,6 @@ export class CreateCommentUseCase {
         })
 
         await this.commentRepository.save(newComment);
+        return newComment;
     }
 }

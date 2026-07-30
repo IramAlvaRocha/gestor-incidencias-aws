@@ -5,7 +5,7 @@ import cors from 'cors';
 import { TicketController } from './controllers/ticket.controller.js';
 import { UserController } from './controllers/user.controller.js';
 import { AuthController } from './controllers/auth.controller.js';
-
+import { CommentController } from './controllers/comment.controller.js';
 // Routes
 import {  createTicketRouter } from './routes/ticket.routes.js';
 import { createUserRouter } from './routes/user.routes.js';
@@ -22,6 +22,7 @@ interface ServerDependencies {
   authController: AuthController;
   projectController: ProjectController;
   tokenService: ITokenService;
+  commentController: CommentController;
 }
 
 export const createServer = ({
@@ -30,6 +31,7 @@ export const createServer = ({
   authController,
   projectController,
   tokenService,
+  commentController,
 }: ServerDependencies): Application => {
 
   const app = express();
@@ -42,7 +44,7 @@ export const createServer = ({
 
   // Routes that may have internally protected endpoints
   app.use('/api/users', createUserRouter(userController, tokenService));
-  app.use('/api/tickets', createTicketRouter(ticketController, tokenService));
+  app.use('/api/tickets', createTicketRouter(ticketController, commentController, tokenService));
   app.use('/api/projects', createProjectRouter(projectController, tokenService));
 
   app.get('/', (_req, res) => res.send('API Mini-Jira - Clean Architecture 🚀'));

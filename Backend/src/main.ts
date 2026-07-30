@@ -28,6 +28,12 @@ import { AddMemberToProject } from './application/use-cases/project/AddMemberToP
 import { AssignTicketUseCase } from './application/use-cases/tickets/AssignTicket.js';
 import { ChangeStatusTicketUseCase } from './application/use-cases/tickets/ChangeStatusTicket.js';
 
+//Comments
+import { CommentController } from './infrastructure/http/controllers/comment.controller.js';
+import { InMemoryCommentRepository } from './infrastructure/repositories/InMemoryCommentRepository.js';
+import { CreateCommentUseCase } from './application/use-cases/comment/CreateComment.js';
+import { GetAllCommentsByTicketUseCase } from './application/use-cases/comment/GetAllCommentsByTicket.js';
+
 const PORT = env.PORT;
 const JWT_SECRET = env.JWT_SECRET;
 const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN;
@@ -66,12 +72,19 @@ const ticketController = new TicketController(
   changeStatusUseCase,
 );
 
+// --- Comments ---
+const commentRepository = new InMemoryCommentRepository();
+const createCommentUseCase = new CreateCommentUseCase(commentRepository, ticketRepository, projectRepository);
+const getAllCommentsByTicketUseCase = new GetAllCommentsByTicketUseCase(commentRepository, ticketRepository);
+const commentController = new CommentController(createCommentUseCase, getAllCommentsByTicketUseCase);
+
 const app = createServer({
   ticketController,
   userController,
   authController,
   projectController,
   tokenService, // passed so it can be used in protected route middlewares
+  commentController,
 });
 
 app.listen(PORT, () => {
