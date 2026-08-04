@@ -1,9 +1,9 @@
-export type Rol = 'Admin' | 'Developer' | 'Reporter';
+export type Role = 'Admin' | 'Developer' | 'Reporter';
 
 export interface User {
   id: string;
-  nombre: string;
+  name: string;
   email: string;
-  rol: Rol;
-  fechaCreacion: string;
+  role: Role;
+  createdAt: string;
 }

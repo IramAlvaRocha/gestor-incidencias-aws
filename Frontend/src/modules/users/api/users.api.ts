@@ -1,11 +1,11 @@
 import { apiClient } from "@/shared/api/axios";
-import type { Rol, User } from "../types/user.types";
+import type { Role, User } from "../types/user.types";
 
 interface CreateUserPayload {
     name: string,
     email: string,
     password: string,
-    role?: Rol;
+    role?: Role;
 }
 
 export const createUser = async(payload: CreateUserPayload): Promise<User> => {
