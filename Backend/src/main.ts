@@ -7,7 +7,7 @@ import { JsonWebTokenService } from './infrastructure/security/JwtTokenService.j
 
 //User
 import { UserController } from './infrastructure/http/controllers/user.controller.js';
-import { InMemoryUserRepository } from './infrastructure/repositories/InMemoryUserRepository.js';
+import { PrismaUserRepository } from './infrastructure/repositories/PrismaUserRepository.js';
 import { RegisterUserUseCase } from './application/use-cases/user/RegisterUser.js';
 import { GetAllUsersUseCase } from './application/use-cases/user/GetAllUsers.js';
 
@@ -17,11 +17,11 @@ import { AuthenticateUserUseCase } from "./application/use-cases/auth/Authentica
 
 //Tickets
 import { TicketController } from './infrastructure/http/controllers/ticket.controller.js';
-import { InMemoryTicketRepository } from './infrastructure/repositories/InMemoryTicketRepository.js';
+import { PrismaTicketRepository } from './infrastructure/repositories/PrismaTicketRepository.js';
 import { CreateTicketUseCase } from './application/use-cases/tickets/CreateTicket.js';
 import { GetAllTicketsUseCase } from './application/use-cases/tickets/GetAllTickets.js';
 import { ProjectController } from './infrastructure/http/controllers/project.controller.js';
-import { InMemoryProjectRepository } from './infrastructure/repositories/InMemoryProjectRepository.js';
+import { PrismaProjectRepository } from './infrastructure/repositories/PrismaProjectRepository.js';
 import { CreateProjectUseCase } from './application/use-cases/project/CreateProject.js';
 import { GetAllProjectsUseCase } from './application/use-cases/project/GetAllProjects.js';
 import { AddMemberToProject } from './application/use-cases/project/AddMemberToProject.js';
@@ -30,9 +30,10 @@ import { ChangeStatusTicketUseCase } from './application/use-cases/tickets/Chang
 
 //Comments
 import { CommentController } from './infrastructure/http/controllers/comment.controller.js';
-import { InMemoryCommentRepository } from './infrastructure/repositories/InMemoryCommentRepository.js';
+import { PrismaCommentRepository } from './infrastructure/repositories/PrismaCommentRepository.js';
 import { CreateCommentUseCase } from './application/use-cases/comment/CreateComment.js';
 import { GetAllCommentsByTicketUseCase } from './application/use-cases/comment/GetAllCommentsByTicket.js';
+import { prisma } from './infrastructure/database/prismaClient.js';
 
 const PORT = env.PORT;
 const JWT_SECRET = env.JWT_SECRET;
@@ -43,7 +44,7 @@ const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JsonWebTokenService(JWT_SECRET, JWT_EXPIRES_IN);
 
 // --- Users ---
-const userRepository = new InMemoryUserRepository();
+const userRepository = new PrismaUserRepository(prisma);
 const registerUserUseCase = new RegisterUserUseCase(userRepository, passwordHasher);
 const getAllUsersUseCase = new GetAllUsersUseCase(userRepository);
 const userController = new UserController(registerUserUseCase, getAllUsersUseCase);
@@ -53,14 +54,14 @@ const authenticateUserUseCase = new AuthenticateUserUseCase(userRepository, pass
 const authController = new AuthController(authenticateUserUseCase);
 
 // --- Projects ---
-const projectRepository = new InMemoryProjectRepository();
+const projectRepository = new PrismaProjectRepository(prisma);
 const createProject = new CreateProjectUseCase(projectRepository);
 const getAllProjects = new GetAllProjectsUseCase(projectRepository);
 const addMember = new AddMemberToProject(projectRepository,userRepository);
 const projectController = new ProjectController(createProject,getAllProjects,addMember);
 
 // --- Tickets ---
-const ticketRepository = new InMemoryTicketRepository();
+const ticketRepository = new PrismaTicketRepository(prisma);
 const createTicketUseCase = new CreateTicketUseCase(ticketRepository, projectRepository);
 const getAllTicketsUseCase = new GetAllTicketsUseCase(ticketRepository);
 const assignTicketUseCase = new AssignTicketUseCase(ticketRepository, projectRepository);
@@ -73,7 +74,7 @@ const ticketController = new TicketController(
 );
 
 // --- Comments ---
-const commentRepository = new InMemoryCommentRepository();
+const commentRepository = new PrismaCommentRepository(prisma);
 const createCommentUseCase = new CreateCommentUseCase(commentRepository, ticketRepository, projectRepository);
 const getAllCommentsByTicketUseCase = new GetAllCommentsByTicketUseCase(commentRepository, ticketRepository);
 const commentController = new CommentController(createCommentUseCase, getAllCommentsByTicketUseCase);

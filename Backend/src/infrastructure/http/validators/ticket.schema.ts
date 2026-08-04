@@ -9,7 +9,7 @@ export const createTicketSchema = z.object({
 });
 
 export const changeStatusSchema = z.object({
-  status: z.enum(["Open", "In Progress", "Closed"]),
+  status: z.enum(["Open", "InProgress", "Closed"]),
 });
 
 export const assignTicketSchema = z.object({
