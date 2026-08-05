@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import type { AuthenticateUserUseCase } from "../../../application/use-cases/auth/AuthenticateUser.js";
 import { handleControllerError } from "../errors/handleControllerError.js";
+import { cookieOptions } from "../utils/cookieOptions.js";
 
 export class AuthController {
   constructor(private readonly authenticateUser: AuthenticateUserUseCase) {}
@@ -10,9 +11,7 @@ export class AuthController {
       const result = await this.authenticateUser.execute(req.body);
 
       res.cookie('token', result.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        ...cookieOptions(),
         maxAge: 60 * 60 * 1000 //1 hora igual que JWT EXPIRES IN
       });
 
@@ -30,11 +29,7 @@ export class AuthController {
   };
 
   logout = async(_req: Request, res: Response) => {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
+    res.clearCookie("token", cookieOptions());
     return res.status(200).json({ message: "Sesión cerrada correctamente." });
   };
 

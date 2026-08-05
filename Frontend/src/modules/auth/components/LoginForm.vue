@@ -60,6 +60,7 @@ const { mutate: doLogin, isPending, error: apiError } = useLogin();
 
 const { handleSubmit, defineField, errors } = useForm({
     validationSchema: toTypedSchema(loginSchema),
+    initialValues: { email: '', password: '' },
 });
 
 const [email, emailAttrs] = defineField('email');
