@@ -4,16 +4,15 @@ import type { ITokenService } from "../../../application/ports/ITokenService.js"
 
 export const authenticate = (tokenService: ITokenService) => 
     (req: Request, res: Response, next: NextFunction) => {
-        const authHeader = req.headers.authorization;
         
-        if(!authHeader || !authHeader.startsWith('Bearer ')){
-            return res.status(401).json({ error: 'Token not provided' })
+        const token = req.cookies.token;
+        
+        if(!token) {
+            return res.status(401).json({ error: "Not authenticated" })
         }
 
-        const token = authHeader.split(" ")[1];
-
         try {
-            const payload = tokenService.verify(token as string);
+            const payload = tokenService.verify(token);
             req.authenticatedUser = payload;
             next();
         } catch (error) {

@@ -15,6 +15,7 @@ import { createAuthRouter } from './routes/auth.routes.js';
 import { type ITokenService } from '../../application/ports/ITokenService.js';
 import { createProjectRouter } from './routes/project.routes.js';
 import { ProjectController } from './controllers/project.controller.js';
+import cookieParser from 'cookie-parser';
 
 interface ServerDependencies {
   ticketController: TicketController;
@@ -36,11 +37,15 @@ export const createServer = ({
 
   const app = express();
 
-  app.use(cors());
+  app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+  }));
+  app.use(cookieParser())
   app.use(express.json());
 
   // Public routes
-  app.use('/api/auth', createAuthRouter(authController));
+  app.use('/api/auth', createAuthRouter(authController, tokenService));
 
   // Routes that may have internally protected endpoints
   app.use('/api/users', createUserRouter(userController, tokenService));

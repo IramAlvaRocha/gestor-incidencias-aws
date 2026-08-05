@@ -8,13 +8,39 @@ export class AuthController {
   login = async (req: Request, res: Response) => {
     try {
       const result = await this.authenticateUser.execute(req.body);
-      return res.status(200).json(result);
+
+      res.cookie('token', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000 //1 hora igual que JWT EXPIRES IN
+      });
+
+      return res.status(200).json(result.user);
+
     } catch (error) {
+      
       return handleControllerError(
         res,
         error,
         "Internal error while authenticating",
       );
+
     }
   };
+
+  logout = async(_req: Request, res: Response) => {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+    return res.status(200).json({ message: "Sesión cerrada correctamente." });
+  };
+
+  me = (req: Request, res: Response) => {
+    // req.authenticatedUser lo llena el middleware authenticate
+    return res.status(200).json({ user: req.authenticatedUser });
+  };
+
 }
