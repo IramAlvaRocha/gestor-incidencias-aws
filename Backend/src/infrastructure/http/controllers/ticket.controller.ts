@@ -37,28 +37,31 @@ export class TicketController {
 
   getAll = async (_req: Request, res: Response) => {
     const tickets = await this.getAllTicketsUseCase.execute();
-    return res.status(200).json(tickets);
+    return res.status(200).json(tickets.map((ticket) => this.toResponse(ticket)));
   };
 
-  list = async(req: Request, res: Response) => {
+  list = async (req: Request, res: Response) => {
     const projectId = req.query.projectId as string | undefined;
-    const tickets = await this.getTickets.execute({ projectId })
-    return res.status(200).json( tickets );
-  }
-  
+    const tickets = await this.getTickets.execute({ projectId });
+    return res.status(200).json(tickets.map((ticket) => this.toResponse(ticket)));
+  };
 
   getById = async (req: Request, res: Response) => {
-  try {
-    const ticket = await this.getTicketByIdUseCase.execute(req.params.id as string);
-    return res.status(200).json(ticket);
-  } catch (error) {
-    if (error instanceof DomainError) {
-      return res.status(404).json({ error: error.message });
+    try {
+      const ticket = await this.getTicketByIdUseCase.execute(
+        req.params.id as string,
+      );
+      return res.status(200).json(this.toResponse(ticket));
+    } catch (error) {
+      if (error instanceof DomainError) {
+        return res.status(404).json({ error: error.message });
+      }
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: "Error interno al obtener el ticket" });
     }
-    console.error(error);
-    return res.status(500).json({ error: 'Error interno al obtener el ticket' });
-  }
-};
+  };
 
   assign = async (req: Request, res: Response) => {
     try {

@@ -54,7 +54,7 @@ const userController = new UserController(registerUserUseCase, getAllUsersUseCas
 
 // --- Auth ---
 const authenticateUserUseCase = new AuthenticateUserUseCase(userRepository, passwordHasher, tokenService);
-const authController = new AuthController(authenticateUserUseCase);
+const authController = new AuthController(authenticateUserUseCase, userRepository);
 
 // --- Projects ---
 const projectRepository = new PrismaProjectRepository(prisma);

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ArrowLeft, Calendar, Flag, Layers, UserRound } from '@lucide/vue';
+import { ArrowLeft, Calendar, Flag, Layers } from '@lucide/vue';
 import { computed, toRef } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import CommentList from '@/modules/comments/components/CommentList.vue';
 import { useProject } from '@/modules/projects/composables/useProject';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -175,17 +176,7 @@ const createdAtLabel = computed(() => {
 
           <Separator />
 
-          <section class="border-border/60 rounded-xl border border-dashed px-4 py-10 text-center">
-            <div
-              class="bg-muted text-muted-foreground mx-auto mb-3 flex size-10 items-center justify-center rounded-xl"
-            >
-              <UserRound class="size-5" />
-            </div>
-            <p class="text-sm font-medium">Comentarios</p>
-            <p class="text-muted-foreground mt-1 text-xs">
-              La conversación del ticket llegará en la siguiente fase.
-            </p>
-          </section>
+          <CommentList :ticket-id="ticket.id" />
         </CardContent>
       </Card>
 

@@ -1,8 +1,8 @@
 import { apiClient } from '@/shared/api/axios';
 import type { Comment, CreateCommentPayload } from '../types/comment.types';
 
-export const getAllComments = async (ticketId: string): Promise<Comment[]> => {
-  const { data } = await apiClient.get<Comment[]>(`/tickets/${ticketId}/comentarios`);
+export const getComments = async (ticketId: string): Promise<Comment[]> => {
+  const { data } = await apiClient.get<Comment[]>(`/tickets/${ticketId}/comments`);
   return data;
 };
 
