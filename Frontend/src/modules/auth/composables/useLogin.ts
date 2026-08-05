@@ -5,16 +5,13 @@ import { login } from "../api/auth.api";
 import type { LoginCredentials } from "../types/auth.types";
 
 export const useLogin = () => {
-
     const authStore = useAuthStore();
     const router = useRouter();
-
-
 
     return useMutation({
         mutationFn: (credentials: LoginCredentials) => login(credentials),
         onSuccess: (data) => {
-            authStore.setSession(data.token, data.user);
+            authStore.setUser(data.user);
             router.push('/');
         }
     })
