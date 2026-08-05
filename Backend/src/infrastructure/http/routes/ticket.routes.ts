@@ -20,9 +20,10 @@ export const createTicketRouter = (
   const auth = authenticate(tokenService);
 
   router.post("/", auth, validate(createTicketSchema), controller.create);
-  router.get("/", auth, controller.getAll);
+  router.get("/", auth, controller.list);
   router.patch("/:id/assign", auth, validate(assignTicketSchema), controller.assign);
   router.patch("/:id/status", auth, validate(changeStatusSchema), controller.changeStatus);
+  router.get('/:id', auth, controller.getById);
 
   //Rutas anidadas de comentarios
   router.use("/:id/comments", createCommentRouter(commentController, tokenService));

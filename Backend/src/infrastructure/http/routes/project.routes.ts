@@ -31,5 +31,7 @@ export const createProjectRouter = (
         projectController.addMemberToProject
     )
 
+    router.get('/:id', authenticate(tokenService), projectController.getById); 
+
     return router;
 }

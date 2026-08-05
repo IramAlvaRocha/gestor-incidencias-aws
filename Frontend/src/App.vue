@@ -1,29 +1,33 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useAuthStore } from './modules/auth/store/auth.store';
 import { getMe } from './modules/auth/api/auth.api';
+import { useAuthStore } from './modules/auth/store/auth.store';
 
 const { setUser } = useAuthStore();
 const isCheckingSession = ref(true);
 
-onMounted(async() => {
+onMounted(async () => {
   try {
     const { user } = await getMe();
     setUser(user);
-  } catch (error) {
-    //No hay una session valida
-  }
-  finally {
+  } catch {
+    // Sin sesión válida
+  } finally {
     isCheckingSession.value = false;
   }
-})
+});
 </script>
 
 <template>
-
-  <div v-if="isCheckingSession" class="flex items-center justify-center h-screen">
-    Cargando ...
+  <div
+    v-if="isCheckingSession"
+    class="bg-background flex min-h-svh flex-col items-center justify-center gap-3"
+  >
+    <div
+      class="border-primary size-9 animate-spin rounded-full border-2 border-t-transparent"
+    />
+    <p class="text-muted-foreground text-sm">Preparando tu espacio...</p>
   </div>
 
-  <router-view v-else/>
+  <RouterView v-else />
 </template>

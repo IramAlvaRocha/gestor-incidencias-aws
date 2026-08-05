@@ -17,3 +17,9 @@ export const addMember = async(projectId: string, userId: string): Promise<Proje
     const { data } = await apiClient.post<Project>(`/projects/${projectId}/members`, { userId } );
     return data;
 }
+
+
+export const getProjectById = async(id: string): Promise<Project> => {
+    const { data } = await apiClient.get<Project>(`/projects/${id}`);
+    return data;
+}

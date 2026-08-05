@@ -9,7 +9,7 @@ export interface Ticket {
   description: string;
   type: TicketType;
   priority: Priority;
-  estado: TicketStatus;
+  status: TicketStatus;
   projectId: string;
   reporterId: string;
   assigneeId: string | null;

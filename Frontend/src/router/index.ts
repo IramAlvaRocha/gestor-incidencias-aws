@@ -19,22 +19,36 @@ const routes = [
         name: "projects",
         component: () =>
           import("@/modules/projects/views/ProjectsListView.vue"),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, title: "Proyectos" },
       },
       {
         path: "projects",
         redirect: { name: "projects" },
       },
       {
-        path: '/tickets',
-        name: 'tickets',
-        component: () => import("@/modules/tickets/views/TicketsListView.vue")
+        path: "projects/:projectId",
+        name: "project-detail",
+        component: () =>
+          import("@/modules/projects/views/ProjectDetailView.vue"),
+        meta: { requiresAuth: true, title: "Detalle del proyecto" },
+      },
+      {
+        path: "tickets",
+        name: "tickets",
+        component: () => import("@/modules/tickets/views/TicketsListView.vue"),
+        meta: { title: "Tickets" },
+      },
+      {
+        path: "projects/:projectId/tickets",
+        name: "project-tickets",
+        component: () => import("@/modules/tickets/views/TicketsListView.vue"),
+        meta: { title: "Tickets del proyecto" },
       },
       {
         path: "tickets/:id",
         name: "ticket-detail",
         component: () => import("@/modules/tickets/views/TicketDetailView.vue"),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, title: "Detalle del ticket" },
       },
     ],
   },

@@ -4,6 +4,9 @@ import type { GetAllTicketsUseCase } from "../../../application/use-cases/ticket
 import type { AssignTicketUseCase } from "../../../application/use-cases/tickets/AssignTicket.js";
 import type { ChangeStatusTicketUseCase } from "../../../application/use-cases/tickets/ChangeStatusTicket.js";
 import { handleControllerError } from "../errors/handleControllerError.js";
+import type { GetTicketByProjectUseCase } from "../../../application/use-cases/tickets/GetTicketsByProject.js";
+import type { GetTicketByIdUseCase } from "../../../application/use-cases/tickets/GetTicketById.js";
+import { DomainError } from "../../../domain/errors/DomainError.js";
 
 export class TicketController {
   constructor(
@@ -11,6 +14,8 @@ export class TicketController {
     private readonly getAllTicketsUseCase: GetAllTicketsUseCase,
     private readonly assignTicketUseCase: AssignTicketUseCase,
     private readonly changeStatusUseCase: ChangeStatusTicketUseCase,
+    private readonly getTickets: GetTicketByProjectUseCase,
+    private readonly getTicketByIdUseCase: GetTicketByIdUseCase,
   ) {}
 
   create = async (req: Request, res: Response) => {
@@ -20,7 +25,7 @@ export class TicketController {
         ...req.body,
         reporterId,
       });
-      return res.status(201).json(ticket);
+      return res.status(201).json(this.toResponse(ticket));
     } catch (error) {
       return handleControllerError(
         res,
@@ -35,6 +40,26 @@ export class TicketController {
     return res.status(200).json(tickets);
   };
 
+  list = async(req: Request, res: Response) => {
+    const projectId = req.query.projectId as string | undefined;
+    const tickets = await this.getTickets.execute({ projectId })
+    return res.status(200).json( tickets );
+  }
+  
+
+  getById = async (req: Request, res: Response) => {
+  try {
+    const ticket = await this.getTicketByIdUseCase.execute(req.params.id as string);
+    return res.status(200).json(ticket);
+  } catch (error) {
+    if (error instanceof DomainError) {
+      return res.status(404).json({ error: error.message });
+    }
+    console.error(error);
+    return res.status(500).json({ error: 'Error interno al obtener el ticket' });
+  }
+};
+
   assign = async (req: Request, res: Response) => {
     try {
       const { id: ticketId } = req.params;
@@ -42,7 +67,7 @@ export class TicketController {
         ticketId: ticketId as string,
         assigneeId: req.body.assigneeId,
       });
-      return res.status(200).json(ticket);
+      return res.status(200).json(this.toResponse(ticket));
     } catch (error) {
       return handleControllerError(
         res,
@@ -59,7 +84,7 @@ export class TicketController {
         ticketId: ticketId as string,
         newStatus: req.body.status,
       });
-      return res.status(200).json(ticket);
+      return res.status(200).json(this.toResponse(ticket));
     } catch (error) {
       return handleControllerError(
         res,
@@ -68,4 +93,36 @@ export class TicketController {
       );
     }
   };
+
+  private toResponse(ticket: {
+    id: string;
+    key: string;
+    title: string;
+    description: string;
+    type: string;
+    priority: string;
+    status: string;
+    projectId: string;
+    reporterId: string;
+    assigneeId: string | null;
+    attachments: string[];
+    createdAt: Date;
+    updatedAt: Date;
+  }) {
+    return {
+      id: ticket.id,
+      key: ticket.key,
+      title: ticket.title,
+      description: ticket.description,
+      type: ticket.type,
+      priority: ticket.priority,
+      status: ticket.status,
+      projectId: ticket.projectId,
+      reporterId: ticket.reporterId,
+      assigneeId: ticket.assigneeId,
+      attachments: ticket.attachments,
+      createdAt: ticket.createdAt,
+      updatedAt: ticket.updatedAt,
+    };
+  }
 }

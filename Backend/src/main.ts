@@ -27,6 +27,9 @@ import { GetAllProjectsUseCase } from './application/use-cases/project/GetAllPro
 import { AddMemberToProject } from './application/use-cases/project/AddMemberToProject.js';
 import { AssignTicketUseCase } from './application/use-cases/tickets/AssignTicket.js';
 import { ChangeStatusTicketUseCase } from './application/use-cases/tickets/ChangeStatusTicket.js';
+import { GetTicketByProjectUseCase } from './application/use-cases/tickets/GetTicketsByProject.js';
+import { GetTicketByIdUseCase } from './application/use-cases/tickets/GetTicketById.js';
+import { GetProjectById } from './application/use-cases/project/GetProjectById.js';
 
 //Comments
 import { CommentController } from './infrastructure/http/controllers/comment.controller.js';
@@ -57,8 +60,14 @@ const authController = new AuthController(authenticateUserUseCase);
 const projectRepository = new PrismaProjectRepository(prisma);
 const createProject = new CreateProjectUseCase(projectRepository);
 const getAllProjects = new GetAllProjectsUseCase(projectRepository);
-const addMember = new AddMemberToProject(projectRepository,userRepository);
-const projectController = new ProjectController(createProject,getAllProjects,addMember);
+const addMember = new AddMemberToProject(projectRepository, userRepository);
+const getProjectById = new GetProjectById(projectRepository);
+const projectController = new ProjectController(
+  createProject,
+  getAllProjects,
+  addMember,
+  getProjectById,
+);
 
 // --- Tickets ---
 const ticketRepository = new PrismaTicketRepository(prisma);
@@ -66,11 +75,15 @@ const createTicketUseCase = new CreateTicketUseCase(ticketRepository, projectRep
 const getAllTicketsUseCase = new GetAllTicketsUseCase(ticketRepository);
 const assignTicketUseCase = new AssignTicketUseCase(ticketRepository, projectRepository);
 const changeStatusUseCase = new ChangeStatusTicketUseCase(ticketRepository);
+const getTicketsByProjectUseCase = new GetTicketByProjectUseCase(ticketRepository);
+const getTicketByIdUseCase = new GetTicketByIdUseCase(ticketRepository);
 const ticketController = new TicketController(
   createTicketUseCase,
   getAllTicketsUseCase,
   assignTicketUseCase,
   changeStatusUseCase,
+  getTicketsByProjectUseCase,
+  getTicketByIdUseCase,
 );
 
 // --- Comments ---

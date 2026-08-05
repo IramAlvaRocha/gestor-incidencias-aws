@@ -4,6 +4,10 @@ import type { ITicketRepository } from "../../domain/repositories/ITicketReposit
 export class InMemoryTicketRepository implements ITicketRepository {
   private tickets: Ticket[] = [];
 
+  async findByProjectId(id: string): Promise<Ticket[]> {
+    return this.tickets.filter(t => t.projectId === id)
+  }
+
   async save(Ticket: Ticket): Promise<Ticket> {
     this.tickets.push(Ticket);
     return Ticket;

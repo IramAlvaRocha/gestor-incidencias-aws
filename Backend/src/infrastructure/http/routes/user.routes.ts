@@ -10,7 +10,7 @@ export const createUserRouter = (controller: UserController, tokenService: IToke
   const router = Router();
 
   router.post('/', validate(registerUserSchema), controller.register);
-  router.get('/', authenticate(tokenService), authorize('Admin'),controller.getAll);
+  router.get('/', authenticate(tokenService), controller.getAll);
 
   return router;
 };

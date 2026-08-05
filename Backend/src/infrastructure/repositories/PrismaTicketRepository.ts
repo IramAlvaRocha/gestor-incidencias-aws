@@ -15,6 +15,11 @@ export class PrismaTicketRepository implements ITicketRepository {
     constructor(
         private readonly prisma: PrismaClient
     ) {}
+
+    async findByProjectId(projectId: string): Promise<Ticket[]> {
+        const tickets = await this.prisma.ticket.findMany({ where: { projectId } });
+        return tickets.map((row) => this.toDomain(row));
+    }
     
     async save(ticket: Ticket): Promise<Ticket> {
         await this.prisma.ticket.create({
@@ -45,7 +50,10 @@ export class PrismaTicketRepository implements ITicketRepository {
                 description: ticket.description,
                 type: ticket.type,
                 priority: ticket.priority,
-            }
+                status: ticket.status,
+                assigneeId: ticket.assigneeId,
+                updatedAt: ticket.updatedAt,
+            },
         });
         return ticket;
     }
