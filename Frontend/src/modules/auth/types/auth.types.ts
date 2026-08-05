@@ -12,7 +12,4 @@ export interface AuthUser {
   role: Role;
 }
 
-export interface AuthResponse {
-  token: string;
-  user: AuthUser;
-}
+export type AuthResponse = AuthUser;

@@ -10,9 +10,9 @@ export const useLogin = () => {
 
     return useMutation({
         mutationFn: (credentials: LoginCredentials) => login(credentials),
-        onSuccess: (data) => {
-            authStore.setUser(data.user);
-            router.push('/');
+        onSuccess: (user) => {
+            authStore.setUser(user);
+            router.push({ name: 'projects' });
         }
     })
 }
