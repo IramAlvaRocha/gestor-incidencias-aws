@@ -52,6 +52,7 @@ export class PrismaTicketRepository implements ITicketRepository {
                 priority: ticket.priority,
                 status: ticket.status,
                 assigneeId: ticket.assigneeId,
+                attachments: ticket.attachments,
                 updatedAt: ticket.updatedAt,
             },
         });

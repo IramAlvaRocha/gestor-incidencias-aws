@@ -100,4 +100,9 @@ export class Ticket {
     this.assigneeId = userId;
     this.updatedAt = new Date();
   }
+
+  addAttachment(key: string): void {
+    this.attachments.push(key);
+    this.updatedAt = new Date();
+  }
 }

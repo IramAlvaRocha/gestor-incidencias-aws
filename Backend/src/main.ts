@@ -37,10 +37,20 @@ import { PrismaCommentRepository } from './infrastructure/repositories/PrismaCom
 import { CreateCommentUseCase } from './application/use-cases/comment/CreateComment.js';
 import { GetAllCommentsByTicketUseCase } from './application/use-cases/comment/GetAllCommentsByTicket.js';
 import { prisma } from './infrastructure/database/prismaClient.js';
+import { RequestUploadURLUseCase } from './application/use-cases/tickets/RequestUploadURL.js';
+import { AddTicketAttachmentUseCase } from './application/use-cases/tickets/AddTicketAttachment.js';
+import { GetTicketAttachmentsUseCase } from './application/use-cases/tickets/GetTicketAttachments.js';
+import { S3StorageService } from './infrastructure/storage/S3StorageService.js';
 
 const PORT = env.PORT;
 const JWT_SECRET = env.JWT_SECRET;
 const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN;
+
+// --- AWS Storage service ---
+const storageService = new S3StorageService(
+  process.env.S3_BUCKET_NAME!,
+  process.env.AWS_REGION!
+)
 
 // --- Security ---
 const passwordHasher = new BcryptPasswordHasher();
@@ -77,6 +87,10 @@ const assignTicketUseCase = new AssignTicketUseCase(ticketRepository, projectRep
 const changeStatusUseCase = new ChangeStatusTicketUseCase(ticketRepository);
 const getTicketsByProjectUseCase = new GetTicketByProjectUseCase(ticketRepository);
 const getTicketByIdUseCase = new GetTicketByIdUseCase(ticketRepository);
+const requestUploadUrlUseCase = new RequestUploadURLUseCase(ticketRepository, storageService);
+const addTicketAttachmentUseCase = new AddTicketAttachmentUseCase(ticketRepository, projectRepository);
+const getTicketAttachmentsUseCase = new GetTicketAttachmentsUseCase(ticketRepository, storageService);
+
 const ticketController = new TicketController(
   createTicketUseCase,
   getAllTicketsUseCase,
@@ -84,6 +98,9 @@ const ticketController = new TicketController(
   changeStatusUseCase,
   getTicketsByProjectUseCase,
   getTicketByIdUseCase,
+  addTicketAttachmentUseCase,
+  requestUploadUrlUseCase,
+  getTicketAttachmentsUseCase
 );
 
 // --- Comments ---

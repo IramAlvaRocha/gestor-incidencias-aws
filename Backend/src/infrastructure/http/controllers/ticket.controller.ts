@@ -7,6 +7,9 @@ import { handleControllerError } from "../errors/handleControllerError.js";
 import type { GetTicketByProjectUseCase } from "../../../application/use-cases/tickets/GetTicketsByProject.js";
 import type { GetTicketByIdUseCase } from "../../../application/use-cases/tickets/GetTicketById.js";
 import { DomainError } from "../../../domain/errors/DomainError.js";
+import type { AddTicketAttachmentUseCase } from "../../../application/use-cases/tickets/AddTicketAttachment.js";
+import type { RequestUploadURLUseCase } from "../../../application/use-cases/tickets/RequestUploadURL.js";
+import type { GetTicketAttachmentsUseCase } from "../../../application/use-cases/tickets/GetTicketAttachments.js";
 
 export class TicketController {
   constructor(
@@ -16,6 +19,9 @@ export class TicketController {
     private readonly changeStatusUseCase: ChangeStatusTicketUseCase,
     private readonly getTickets: GetTicketByProjectUseCase,
     private readonly getTicketByIdUseCase: GetTicketByIdUseCase,
+    private readonly addAttachmentUseCase: AddTicketAttachmentUseCase,
+    private readonly requestUploadURLUseCase: RequestUploadURLUseCase,
+    private readonly getTicketAttachmentsUseCase: GetTicketAttachmentsUseCase,
   ) {}
 
   create = async (req: Request, res: Response) => {
@@ -37,13 +43,17 @@ export class TicketController {
 
   getAll = async (_req: Request, res: Response) => {
     const tickets = await this.getAllTicketsUseCase.execute();
-    return res.status(200).json(tickets.map((ticket) => this.toResponse(ticket)));
+    return res
+      .status(200)
+      .json(tickets.map((ticket) => this.toResponse(ticket)));
   };
 
   list = async (req: Request, res: Response) => {
     const projectId = req.query.projectId as string | undefined;
     const tickets = await this.getTickets.execute({ projectId });
-    return res.status(200).json(tickets.map((ticket) => this.toResponse(ticket)));
+    return res
+      .status(200)
+      .json(tickets.map((ticket) => this.toResponse(ticket)));
   };
 
   getById = async (req: Request, res: Response) => {
@@ -94,6 +104,61 @@ export class TicketController {
         error,
         "Internal error while changing the ticket status",
       );
+    }
+  };
+
+  addAttachment = async (req: Request, res: Response) => {
+    const user = req.authenticatedUser!.userId;
+
+    try {
+      const ticket = await this.addAttachmentUseCase.execute({
+        ticketId: req.params.id as string,
+        key: req.body.key,
+        userId: user,
+      });
+
+      return res.status(200).json(ticket);
+    } catch (error) {
+      if (error instanceof DomainError) {
+        return res.status(400).json({
+          error: error.message,
+        });
+        console.error(error);
+        return res.status(500).json({ error: "Error al guardar el adjunto" });
+      }
+    }
+  };
+
+  requestUploadUrl = async (req: Request, res: Response) => {
+    try {
+      const result = await this.requestUploadURLUseCase.execute({
+        ticketId: req.params.id as string,
+        fileName: req.body.fileName,
+        contentType: req.body.contentType,
+      });
+
+      return res.status(200).json(result);
+    } catch (error) {
+      if (error instanceof DomainError) {
+        return res.status(400).json({ error: error.message });
+      }
+      console.error(error);
+      return res.status(500).json({ error: "Error al obtener URL de subida" });
+    }
+  };
+
+  getAttachments = async (req: Request, res: Response) => {
+    try {
+      const attachments = await this.getTicketAttachmentsUseCase.execute(
+        req.params.id as string,
+      );
+      return res.status(200).json(attachments);
+    } catch (error) {
+      if (error instanceof DomainError) {
+        return res.status(404).json({ error: error.message });
+      }
+      console.error(error);
+      return res.status(500).json({ error: "Error al obtener adjuntos" });
     }
   };
 

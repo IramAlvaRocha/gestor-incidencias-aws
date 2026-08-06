@@ -16,6 +16,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import AsigneeSelect from '../components/AsigneeSelect.vue';
+import AttachmentList from '../components/AttachmentList.vue';
 import TicketStatusBadge from '../components/TicketStatusBadge.vue';
 import TicketStatusSelect from '../components/TicketStatusSelect.vue';
 import { useTicket } from '../composables/useTicket';
@@ -198,6 +199,12 @@ const createdAtLabel = computed(() => {
             <p v-else class="text-muted-foreground text-xs">
               Cargando miembros del proyecto...
             </p>
+          </CardContent>
+        </Card>
+
+        <Card class="border-border/70">
+          <CardContent class="pt-5">
+            <AttachmentList :ticket-id="ticket.id" />
           </CardContent>
         </Card>
       </aside>

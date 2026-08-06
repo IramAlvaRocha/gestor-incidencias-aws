@@ -10,6 +10,7 @@ import {
   changeStatusSchema,
   createTicketSchema,
 } from "../validators/ticket.schema.js";
+import { addAttachmentSchema, requestUploadUrlSchema } from "../validators/attachment.schema.js";
 
 export const createTicketRouter = (
   controller: TicketController,
@@ -23,7 +24,20 @@ export const createTicketRouter = (
   router.get("/", auth, controller.list);
   router.patch("/:id/assign", auth, validate(assignTicketSchema), controller.assign);
   router.patch("/:id/status", auth, validate(changeStatusSchema), controller.changeStatus);
-  router.get('/:id', auth, controller.getById);
+  router.get("/:id/attachments", auth, controller.getAttachments);
+  router.post(
+    "/:id/attachments/upload-url",
+    auth,
+    validate(requestUploadUrlSchema),
+    controller.requestUploadUrl,
+  );
+  router.post(
+    "/:id/attachments",
+    auth,
+    validate(addAttachmentSchema),
+    controller.addAttachment,
+  );
+  router.get("/:id", auth, controller.getById);
 
   //Rutas anidadas de comentarios
   router.use("/:id/comments", createCommentRouter(commentController, tokenService));

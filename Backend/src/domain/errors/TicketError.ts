@@ -17,3 +17,11 @@ export class TicketNotFoundError extends DomainError {
         super("No ticket was found with the provided id")
     }
 }
+
+export const ALLOWED_CONTENT_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'application/pdf'];
+
+export class InvalidFileTypeError extends Error {
+  constructor() {
+    super(`Tipo de archivo no permitido. Solo se aceptan: ${ALLOWED_CONTENT_TYPES.join(', ')}`);
+  }
+}
