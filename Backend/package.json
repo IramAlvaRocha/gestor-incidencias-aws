@@ -27,6 +27,7 @@
     "jsonwebtoken": "^9.0.3",
     "mariadb": "^3.5.3",
     "prisma": "^7.9.1",
+    "serverless-http": "^4.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
