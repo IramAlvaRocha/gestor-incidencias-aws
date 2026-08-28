@@ -14,7 +14,9 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1108.0",
     "@aws-sdk/client-s3": "^3.1104.0",
+    "@aws-sdk/lib-dynamodb": "^3.1108.0",
     "@aws-sdk/s3-request-presigner": "^3.1104.0",
     "@prisma/adapter-mariadb": "^7.9.1",
     "@prisma/client": "^7.9.1",
