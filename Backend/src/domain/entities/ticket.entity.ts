@@ -4,7 +4,7 @@ export type TicketStatus = "Open" | "InProgress" | "Closed";
 export type Priority = "Low" | "Medium" | "High";
 export type TicketType = "Bug" | "Task" | "Story" | "Improvement";
 
-interface CreateTicketProps {
+export interface CreateTicketProps {
   id: string;
   key: string;
   title: string;
