@@ -1,0 +1,179 @@
+erDiagram
+    ticket {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ project_id
+        bigint number
+        varchar_64_ ticket_key
+        varchar_160_ title
+        text description
+        varchar_32_ type
+        varchar_32_ priority
+        varchar_32_ status
+        varchar_32_ visibility
+        char_36_ reporter_user_id
+        char_36_ created_by
+        char_36_ offering_id
+        char_36_ requester_level_id
+        varchar_32_ impact
+        varchar_32_ urgency
+        json classification_snapshot
+        char_36_ current_group_id
+        char_36_ assignee_user_id
+        varchar_32_ sla_mode
+        varchar_64_ resolution_code
+        text resolution_summary
+        text cancellation_reason
+        datetime_3_ accepted_at
+        datetime_3_ resolved_at
+        datetime_3_ closed_at
+        datetime_3_ updated_at
+        int version
+    }
+    ticket_ci {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        char_36_ ci_id
+        boolean is_primary
+        json snapshot
+    }
+    ticket_comment {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        char_36_ author_user_id
+        varchar_32_ visibility
+        text body
+        datetime_3_ edited_at
+        int version
+    }
+    attachment {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        char_36_ comment_id
+        char_36_ uploaded_by
+        varchar_512_ object_key
+        varchar_160_ file_name
+        varchar_160_ content_type
+        bigint size_bytes
+        char_64_ checksum
+        varchar_32_ visibility
+        varchar_32_ scan_status
+        datetime_3_ verified_at
+    }
+    ticket_participant {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        char_36_ user_id
+        varchar_32_ kind
+        char_36_ added_by
+        varchar_32_ status
+    }
+    ticket_relation {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ source_ticket_id
+        char_36_ target_ticket_id
+        varchar_32_ kind
+    }
+    tag {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ project_id
+        varchar_30_ name
+    }
+    ticket_tag {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        char_36_ tag_id
+    }
+    ticket_event {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        bigint sequence
+        varchar_64_ event_type
+        char_36_ actor_user_id
+        datetime_3_ occurred_at
+        varchar_32_ visibility
+        json payload
+        varchar_64_ request_id
+    }
+    ticket_assignment {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        char_36_ group_id
+        char_36_ assignee_user_id
+        datetime_3_ started_at
+        datetime_3_ ended_at
+        text reason
+        char_36_ assigned_by
+        char_36_ routing_rule_id
+    }
+    ticket_transfer {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        char_36_ from_assignment_id
+        char_36_ to_group_id
+        char_36_ requested_by
+        text reason
+        varchar_32_ status
+        char_36_ decided_by
+        text decision_reason
+        datetime_3_ decided_at
+        datetime_3_ review_due_at
+        char_36_ result_assignment_id
+        int version
+    }
+    client ||--o{ ticket : ""
+    project ||--o{ ticket : "project_id"
+    service_offering |o--o{ ticket : "offering_id"
+    requester_level |o--o{ ticket : "requester_level_id"
+    app_user ||--o{ ticket : "reporter_user_id"
+    app_user ||--o{ ticket : "created_by"
+    resolver_group |o--o{ ticket : "current_group_id"
+    app_user |o--o{ ticket : "assignee_user_id"
+    client ||--o{ ticket_ci : ""
+    ticket ||--o{ ticket_ci : "ticket_id"
+    configuration_item ||--o{ ticket_ci : "ci_id"
+    client ||--o{ ticket_comment : ""
+    ticket ||--o{ ticket_comment : "ticket_id"
+    app_user ||--o{ ticket_comment : "author_user_id"
+    client ||--o{ attachment : ""
+    ticket ||--o{ attachment : "ticket_id"
+    ticket_comment |o--o{ attachment : "comment_id"
+    app_user ||--o{ attachment : "uploaded_by"
+    client ||--o{ ticket_participant : ""
+    ticket ||--o{ ticket_participant : "ticket_id"
+    app_user ||--o{ ticket_participant : "user_id"
+    app_user ||--o{ ticket_participant : "added_by"
+    client ||--o{ ticket_relation : ""
+    ticket ||--o{ ticket_relation : "source_ticket_id"
+    ticket ||--o{ ticket_relation : "target_ticket_id"
+    client ||--o{ tag : ""
+    project ||--o{ tag : "project_id"
+    client ||--o{ ticket_tag : ""
+    ticket ||--o{ ticket_tag : "ticket_id"
+    tag ||--o{ ticket_tag : "tag_id"
+    client ||--o{ ticket_event : ""
+    ticket ||--o{ ticket_event : "ticket_id"
+    app_user |o--o{ ticket_event : "actor_user_id"
+    client ||--o{ ticket_assignment : ""
+    ticket ||--o{ ticket_assignment : "ticket_id"
+    resolver_group ||--o{ ticket_assignment : "group_id"
+    app_user |o--o{ ticket_assignment : "assignee_user_id"
+    app_user ||--o{ ticket_assignment : "assigned_by"
+    routing_rule |o--o{ ticket_assignment : "routing_rule_id"
+    client ||--o{ ticket_transfer : ""
+    ticket ||--o{ ticket_transfer : "ticket_id"
+    ticket_assignment ||--o{ ticket_transfer : "from_assignment_id"
+    ticket_assignment |o--o{ ticket_transfer : "result_assignment_id"
+    resolver_group ||--o{ ticket_transfer : "to_group_id"
+    app_user ||--o{ ticket_transfer : "requested_by"
+    app_user |o--o{ ticket_transfer : "decided_by"

@@ -1,0 +1,93 @@
+erDiagram
+    auth_account {
+        char_36_ id PK
+        varchar_254_ email_normalized
+        datetime_3_ email_verified_at
+        varchar_32_ status
+        int token_version
+        datetime_3_ updated_at
+    }
+    auth_password {
+        char_36_ id PK
+        char_36_ account_id
+        varchar_512_ encoded_hash
+        datetime_3_ changed_at
+    }
+    auth_session {
+        char_36_ id PK
+        char_36_ account_id
+        varchar_64_ client_code
+        datetime_3_ absolute_expires_at
+        datetime_3_ idle_expires_at
+        datetime_3_ revoked_at
+        varchar_64_ revoke_reason
+        datetime_3_ last_seen_at
+        int version
+    }
+    auth_refresh_token {
+        char_36_ id PK
+        char_36_ session_id
+        int generation
+        char_64_ token_hash
+        datetime_3_ expires_at
+        datetime_3_ used_at
+        datetime_3_ revoked_at
+    }
+    auth_one_time_token {
+        char_36_ id PK
+        char_36_ account_id
+        varchar_64_ purpose
+        char_64_ token_hash
+        datetime_3_ expires_at
+        datetime_3_ consumed_at
+    }
+    auth_mfa_credential {
+        char_36_ id PK
+        char_36_ account_id
+        varchar_32_ kind
+        varchar_255_ credential_identifier
+        json public_data
+        varchar_512_ encrypted_secret_ref
+        datetime_3_ verified_at
+        datetime_3_ revoked_at
+    }
+    auth_recovery_code {
+        char_36_ id PK
+        char_36_ account_id
+        char_64_ code_hash
+        datetime_3_ used_at
+    }
+    auth_signing_key {
+        char_36_ id PK
+        varchar_64_ kid
+        varchar_64_ algorithm
+        json public_jwk
+        varchar_512_ private_key_ref
+        datetime_3_ active_from
+        datetime_3_ retire_after
+        varchar_32_ status
+    }
+    auth_security_event {
+        char_36_ id PK
+        char_36_ account_id
+        char_36_ session_id
+        varchar_64_ event_type
+        datetime_3_ occurred_at
+        json details_redacted
+    }
+    auth_outbox_event {
+        char_36_ id PK
+        varchar_64_ event_type
+        char_36_ aggregate_id
+        json payload
+        datetime_3_ published_at
+        int attempts
+    }
+    auth_account ||--o| auth_password : "account_id"
+    auth_account ||--o{ auth_session : "account_id"
+    auth_session ||--o{ auth_refresh_token : "session_id"
+    auth_account ||--o{ auth_one_time_token : "account_id"
+    auth_account ||--o{ auth_mfa_credential : "account_id"
+    auth_account ||--o{ auth_recovery_code : "account_id"
+    auth_account |o--o{ auth_security_event : "account_id"
+    auth_session |o--o{ auth_security_event : "session_id"

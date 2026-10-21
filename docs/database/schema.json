@@ -1,0 +1,7154 @@
+{
+  "modules": {
+    "access": "Identidad local y permisos",
+    "catalog": "Organización y catálogo",
+    "cmdb": "CMDB",
+    "policy": "Calendarios y políticas",
+    "ticket": "Tickets y colaboración",
+    "clock": "SLA en ejecución",
+    "ops": "Operación",
+    "identity": "Servicio de autenticación opcional"
+  },
+  "tables": [
+    {
+      "name": "app_user",
+      "module": "access",
+      "description": "Perfil local estable; conserva los UUID de User.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "display_name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "email_display",
+          "type": "varchar(254)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "nullable": false,
+          "note": "Control optimista, incremento atómico"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "arena"
+    },
+    {
+      "name": "identity_link",
+      "module": "access",
+      "description": "Vincula cuenta local a un emisor; no unir por email.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "issuer",
+          "type": "varchar(255)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "subject",
+          "type": "varchar(255)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "issuer",
+          "subject"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "employee",
+      "module": "access",
+      "description": "Empleado de la agencia y rol administrativo global.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "agency_role",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "user_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "client",
+      "module": "access",
+      "description": "Frontera comercial de una instalación con una agencia.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "slug",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "nullable": false,
+          "note": "Control optimista, incremento atómico"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "slug"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "arena"
+    },
+    {
+      "name": "requester_level",
+      "module": "access",
+      "description": "Nivel de servicio, separado del permiso.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "client_id",
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "client_contact",
+      "module": "access",
+      "description": "Relación vigente entre usuario y cliente.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "requester_level_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "client_id",
+          "user_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "requester_level_id"
+          ],
+          "to": "requester_level",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "project",
+      "module": "access",
+      "description": "Proyecto privado; no trasladar entre clientes.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "project_key",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "manager_user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "nullable": false,
+          "note": "Control optimista, incremento atómico"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "project_key"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "manager_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "project_member",
+      "module": "access",
+      "description": "Rol y nivel efectivo opcional por proyecto.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "project_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "role",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "requester_level_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "valid_from",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "valid_until",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": "Límite exclusivo"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "project_id",
+          "user_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "valid_until IS NULL OR valid_until > valid_from"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "project_id"
+          ],
+          "to": "project",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "requester_level_id"
+          ],
+          "to": "requester_level",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "project_counter",
+      "module": "access",
+      "description": "Contador transaccional; nunca COUNT + 1.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "project_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "next_number",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "project_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "next_number > 0"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "project_id"
+          ],
+          "to": "project",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "invitation",
+      "module": "access",
+      "description": "Invitación de un uso; solo hash del token.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "project_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "email_normalized",
+          "type": "varchar(254)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "role",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "token_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "accepted_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "revoked_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "invited_by",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "token_hash"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "project_id"
+          ],
+          "to": "project",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "invited_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "area",
+      "module": "catalog",
+      "description": "Área interna de atención.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "owner_user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "owner_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "resolver_group",
+      "module": "catalog",
+      "description": "Cola con propietario y respaldo.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "area_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "lead_user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "backup_user_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "area_id"
+          ],
+          "to": "area",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "lead_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "backup_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "group_member",
+      "module": "catalog",
+      "description": "Miembro de grupo; no concede acceso a proyectos.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "group_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "group_id",
+          "user_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "group_id"
+          ],
+          "to": "resolver_group",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "project_group",
+      "module": "catalog",
+      "description": "Grupos habilitados para recibir trabajo del proyecto.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "project_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "group_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "project_id",
+          "group_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "project_id"
+          ],
+          "to": "project",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "group_id"
+          ],
+          "to": "resolver_group",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "product",
+      "module": "catalog",
+      "description": "Definición del producto, no su instancia.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "vendor",
+          "type": "varchar(160)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "arena"
+    },
+    {
+      "name": "client_product",
+      "module": "catalog",
+      "description": "Producto contratado por cliente con vigencia.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "product_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "contract_reference",
+          "type": "varchar(160)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "valid_from",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "valid_until",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": "Límite exclusivo"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "valid_until IS NULL OR valid_until > valid_from"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "product_id"
+          ],
+          "to": "product",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "service_category",
+      "module": "catalog",
+      "description": "Agrupación del catálogo de la agencia.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "arena"
+    },
+    {
+      "name": "service",
+      "module": "catalog",
+      "description": "Servicio estable compartido como plantilla.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "category_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "category_id"
+          ],
+          "to": "service_category",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "subservice",
+      "module": "catalog",
+      "description": "Identidad estable del subservicio.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "service_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "service_id",
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "service_id"
+          ],
+          "to": "service",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "subservice_version",
+      "module": "catalog",
+      "description": "Versión publicada inmutable del formulario y defaults.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "subservice_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "revision",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "request_type",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "form_schema",
+          "type": "json",
+          "nullable": false,
+          "note": "JSON Schema validado; no ejecutar código"
+        },
+        {
+          "name": "default_group_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "requires_ci",
+          "type": "boolean",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "published_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "subservice_id",
+          "revision"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "revision > 0"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "subservice_id"
+          ],
+          "to": "subservice",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "default_group_id"
+          ],
+          "to": "resolver_group",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "service_offering",
+      "module": "catalog",
+      "description": "Oferta y cobertura por proyecto; publicar nueva fila al cambiar contrato.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "project_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "subservice_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "client_product_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "routing_version_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "sla_policy_version_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "valid_from",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "valid_until",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": "Límite exclusivo"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "valid_until IS NULL OR valid_until > valid_from"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "project_id"
+          ],
+          "to": "project",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "subservice_version_id"
+          ],
+          "to": "subservice_version",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "client_product_id"
+          ],
+          "to": "client_product",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "routing_version_id"
+          ],
+          "to": "routing_version",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "sla_policy_version_id"
+          ],
+          "to": "sla_policy_version",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "offering_level",
+      "module": "catalog",
+      "description": "Niveles permitidos para esta oferta; filas explícitas, vacío deniega.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "offering_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "requester_level_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "offering_id",
+          "requester_level_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "offering_id"
+          ],
+          "to": "service_offering",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "requester_level_id"
+          ],
+          "to": "requester_level",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ci_class",
+      "module": "cmdb",
+      "description": "Aplicación, base de datos, servidor, integración.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "arena"
+    },
+    {
+      "name": "ci_schema_version",
+      "module": "cmdb",
+      "description": "Esquema tipado y clasificación de atributos.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "class_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "revision",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "attribute_schema",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "published_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "class_id",
+          "revision"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "class_id"
+          ],
+          "to": "ci_class",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "configuration_item",
+      "module": "cmdb",
+      "description": "Instancia concreta propiedad de un cliente.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ci_key",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "schema_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "client_product_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "environment",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "criticality",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "attributes",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "owner_area_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "support_group_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "technical_owner_user_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "source_system",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "external_id",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "nullable": false,
+          "note": "Control optimista, incremento atómico"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "client_id",
+          "ci_key"
+        ],
+        [
+          "client_id",
+          "source_system",
+          "external_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "schema_version_id"
+          ],
+          "to": "ci_schema_version",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "client_product_id"
+          ],
+          "to": "client_product",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "owner_area_id"
+          ],
+          "to": "area",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "support_group_id"
+          ],
+          "to": "resolver_group",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "technical_owner_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ci_project",
+      "module": "cmdb",
+      "description": "CI visible en un proyecto autorizado.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ci_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "project_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "ci_id",
+          "project_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ci_id"
+          ],
+          "to": "configuration_item",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "project_id"
+          ],
+          "to": "project",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ci_relation_type",
+      "module": "cmdb",
+      "description": "Dirección y política de ciclos de una dependencia.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "allow_cycles",
+          "type": "boolean",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "arena"
+    },
+    {
+      "name": "ci_relation",
+      "module": "cmdb",
+      "description": "Arista dirigida; prohibir duplicados y autorrelaciones.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "source_ci_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "target_ci_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "relation_type_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "valid_from",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "valid_until",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": "Límite exclusivo"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "source_ci_id",
+          "target_ci_id",
+          "relation_type_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "source_ci_id <> target_ci_id",
+        "valid_until IS NULL OR valid_until > valid_from"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "source_ci_id"
+          ],
+          "to": "configuration_item",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "target_ci_id"
+          ],
+          "to": "configuration_item",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "relation_type_id"
+          ],
+          "to": "ci_relation_type",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ci_service_link",
+      "module": "cmdb",
+      "description": "CI vinculado a servicio o subservicio; validar coherencia entre ambos.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ci_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "service_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "subservice_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "valid_from",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "valid_until",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": "Límite exclusivo"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "valid_until IS NULL OR valid_until > valid_from"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ci_id"
+          ],
+          "to": "configuration_item",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "service_id"
+          ],
+          "to": "service",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "subservice_id"
+          ],
+          "to": "subservice",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "offering_ci",
+      "module": "cmdb",
+      "description": "Intersección autorizada oferta-proyecto-CI.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "offering_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ci_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "offering_id",
+          "ci_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "offering_id"
+          ],
+          "to": "service_offering",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ci_id"
+          ],
+          "to": "configuration_item",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "business_calendar",
+      "module": "policy",
+      "description": "Identidad del calendario; compartible, sin datos del cliente.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "code"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "arena"
+    },
+    {
+      "name": "calendar_version",
+      "module": "policy",
+      "description": "Reglas congeladas y cobertura de cálculo.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "calendar_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "revision",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "timezone",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "tzdb_version",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "engine_version",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "coverage_start",
+          "type": "date",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "coverage_end",
+          "type": "date",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "content_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "published_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "calendar_id",
+          "revision"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "coverage_end > coverage_start"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "calendar_id"
+          ],
+          "to": "business_calendar",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "calendar_week_interval",
+      "module": "policy",
+      "description": "Intervalos locales [inicio, fin); turnos nocturnos se dividen.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "calendar_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "weekday_iso",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "start_minute",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "end_minute",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [],
+      "indexes": [],
+      "checks": [
+        "weekday_iso BETWEEN 1 AND 7",
+        "start_minute >= 0 AND end_minute <= 1440 AND end_minute > start_minute"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "calendar_version_id"
+          ],
+          "to": "calendar_version",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "calendar_exception",
+      "module": "policy",
+      "description": "Reemplaza toda la jornada de esa fecha civil; sin intervalos significa cerrado.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "calendar_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "local_date",
+          "type": "date",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "recurrence_source",
+          "type": "json",
+          "nullable": true,
+          "note": "Regla expandida al publicar"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "calendar_version_id",
+          "local_date"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "calendar_version_id"
+          ],
+          "to": "calendar_version",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "calendar_exception_interval",
+      "module": "policy",
+      "description": "Ventanas de apertura de la excepción.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "exception_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "start_minute",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "end_minute",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [],
+      "indexes": [],
+      "checks": [
+        "start_minute >= 0 AND end_minute <= 1440 AND end_minute > start_minute"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "exception_id"
+          ],
+          "to": "calendar_exception",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "calendar_work_interval",
+      "module": "policy",
+      "description": "Ventanas UTC compiladas; reproducibilidad frente a cambios de tzdb.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "calendar_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "start_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "end_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "calendar_version_id",
+          "start_at"
+        ]
+      ],
+      "indexes": [
+        [
+          "calendar_version_id",
+          "end_at"
+        ]
+      ],
+      "checks": [
+        "end_at > start_at"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "calendar_version_id"
+          ],
+          "to": "calendar_version",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "sla_policy_set",
+      "module": "policy",
+      "description": "Conjunto contractual de reglas por cliente.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "sla_policy_version",
+      "module": "policy",
+      "description": "Publicación atómica de reglas ordenadas y fallback.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "policy_set_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "revision",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "effective_from",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "engine_version",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "content_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "published_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "policy_set_id",
+          "revision"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "policy_set_id"
+          ],
+          "to": "sla_policy_set",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "sla_rule",
+      "module": "policy",
+      "description": "Primera regla coincidente por orden único; condiciones AND tipadas.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "policy_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "rule_order",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "conditions",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "priority",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "is_fallback",
+          "type": "boolean",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "policy_version_id",
+          "rule_order"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "rule_order >= 0"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "policy_version_id"
+          ],
+          "to": "sla_policy_version",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "sla_target",
+      "module": "policy",
+      "description": "Objetivo independiente por métrica; duraciones enteras.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "rule_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "metric",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "target_ms",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "calendar_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "pause_reasons",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "max_pause_ms",
+          "type": "bigint",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "warning_thresholds",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "rule_id",
+          "metric"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "target_ms > 0",
+        "max_pause_ms IS NULL OR max_pause_ms > 0",
+        "metric IN ('FIRST_RESPONSE','RESOLUTION')"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "rule_id"
+          ],
+          "to": "sla_rule",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "calendar_version_id"
+          ],
+          "to": "calendar_version",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "routing_version",
+      "module": "policy",
+      "description": "Reglas publicadas de distribución interna.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "revision",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "published_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "routing_rule",
+      "module": "policy",
+      "description": "Asignación a grupo; persona opcional, sin alterar SLA.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "routing_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "rule_order",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "conditions",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "group_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "assignee_user_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "fallback_group_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "routing_version_id",
+          "rule_order"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "routing_version_id"
+          ],
+          "to": "routing_version",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "group_id"
+          ],
+          "to": "resolver_group",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "assignee_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "fallback_group_id"
+          ],
+          "to": "resolver_group",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket",
+      "module": "ticket",
+      "description": "Solicitud; columnas opcionales permiten incorporación gradual y tickets legacy.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "project_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "number",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_key",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "title",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "type",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "priority",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "visibility",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "reporter_user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_by",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "offering_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "requester_level_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "impact",
+          "type": "varchar(32)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "urgency",
+          "type": "varchar(32)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "classification_snapshot",
+          "type": "json",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "current_group_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "assignee_user_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "sla_mode",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "ACTIVE, NONE o LEGACY_UNMEASURED; ausencia explícita, nunca SLA cero"
+        },
+        {
+          "name": "resolution_code",
+          "type": "varchar(64)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "resolution_summary",
+          "type": "text",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "cancellation_reason",
+          "type": "text",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "accepted_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "resolved_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "closed_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "nullable": false,
+          "note": "Control optimista, incremento atómico"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "project_id",
+          "number"
+        ],
+        [
+          "ticket_key"
+        ]
+      ],
+      "indexes": [
+        [
+          "client_id",
+          "project_id",
+          "status",
+          "updated_at"
+        ],
+        [
+          "assignee_user_id",
+          "status"
+        ]
+      ],
+      "checks": [
+        "number > 0",
+        "visibility IN ('CLIENT','INTERNAL')"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "project_id"
+          ],
+          "to": "project",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "offering_id"
+          ],
+          "to": "service_offering",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "requester_level_id"
+          ],
+          "to": "requester_level",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "reporter_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "created_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "current_group_id"
+          ],
+          "to": "resolver_group",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "assignee_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_ci",
+      "module": "ticket",
+      "description": "CI afectado, principal o secundario; nunca duplicado.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ci_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "is_primary",
+          "type": "boolean",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "snapshot",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "ticket_id",
+          "ci_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ci_id"
+          ],
+          "to": "configuration_item",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_comment",
+      "module": "ticket",
+      "description": "Comentario público o nota interna; sin borrado cascada.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "author_user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "visibility",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "body",
+          "type": "text",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "edited_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "nullable": false,
+          "note": "Control optimista, incremento atómico"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "author_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "attachment",
+      "module": "ticket",
+      "description": "Metadatos y visibilidad; archivo privado en S3.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "comment_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "uploaded_by",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "object_key",
+          "type": "varchar(512)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "file_name",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "content_type",
+          "type": "varchar(160)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "size_bytes",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "checksum",
+          "type": "char(64)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "visibility",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "scan_status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "verified_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "size_bytes >= 0"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "comment_id"
+          ],
+          "to": "ticket_comment",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "uploaded_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_participant",
+      "module": "ticket",
+      "description": "Participante concede alcance; follower solo notifica.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "kind",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "added_by",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "ticket_id",
+          "user_id",
+          "kind"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "added_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_relation",
+      "module": "ticket",
+      "description": "Relación autorizada entre tickets; ciclos según tipo.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "source_ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "target_ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "kind",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "source_ticket_id",
+          "target_ticket_id",
+          "kind"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "source_ticket_id <> target_ticket_id"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "source_ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "target_ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "tag",
+      "module": "ticket",
+      "description": "Etiqueta de proyecto.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "project_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "type": "varchar(30)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "project_id",
+          "name"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "project_id"
+          ],
+          "to": "project",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_tag",
+      "module": "ticket",
+      "description": "Etiquetas del ticket.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "tag_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "ticket_id",
+          "tag_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "tag_id"
+          ],
+          "to": "tag",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_event",
+      "module": "ticket",
+      "description": "Hecho inmutable con versión por agregado y proyección pública revisada.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "sequence",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "event_type",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "actor_user_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "occurred_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "visibility",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "payload",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "request_id",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "ticket_id",
+          "sequence"
+        ]
+      ],
+      "indexes": [
+        [
+          "ticket_id",
+          "occurred_at"
+        ]
+      ],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "actor_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_assignment",
+      "module": "ticket",
+      "description": "Historia de custodios. La cola actual conserva el ticket durante transferencia.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "group_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "assignee_user_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "started_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ended_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "assigned_by",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "routing_rule_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        },
+        {
+          "name": "open_ticket_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": "Clave generada: una fila activa por agregado",
+          "generated": "CASE WHEN ended_at IS NULL THEN ticket_id ELSE NULL END"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "open_ticket_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "ended_at IS NULL OR ended_at >= started_at"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "group_id"
+          ],
+          "to": "resolver_group",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "assignee_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "assigned_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "routing_rule_id"
+          ],
+          "to": "routing_rule",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_transfer",
+      "module": "ticket",
+      "description": "Solicitar, aceptar, declinar o cancelar traslado; no es rechazo del ticket.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "from_assignment_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "to_group_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "requested_by",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "decided_by",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "decision_reason",
+          "type": "text",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "decided_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "review_due_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "result_assignment_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "nullable": false,
+          "note": "Control optimista, incremento atómico"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        },
+        {
+          "name": "pending_ticket_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": "Clave generada: una fila activa por agregado",
+          "generated": "CASE WHEN status = 'REQUESTED' THEN ticket_id ELSE NULL END"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "pending_ticket_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "from_assignment_id"
+          ],
+          "to": "ticket_assignment",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "result_assignment_id"
+          ],
+          "to": "ticket_assignment",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "to_group_id"
+          ],
+          "to": "resolver_group",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "requested_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "decided_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_cycle",
+      "module": "clock",
+      "description": "Ciclo 1 al aceptar; siguientes al reabrir con motivo.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "cycle_number",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "started_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ended_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "outcome",
+          "type": "varchar(32)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        },
+        {
+          "name": "open_ticket_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": "Clave generada: una fila activa por agregado",
+          "generated": "CASE WHEN ended_at IS NULL THEN ticket_id ELSE NULL END"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "ticket_id",
+          "cycle_number"
+        ],
+        [
+          "open_ticket_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "cycle_number > 0",
+        "ended_at IS NULL OR ended_at >= started_at"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "sla_evaluation",
+      "module": "clock",
+      "description": "Entrada y resultado congelados; también registra overrides y migraciones.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "cycle_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "policy_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "rule_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "input_snapshot",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "result_snapshot",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "evaluated_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "engine_version",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "actor_user_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "cycle_id"
+          ],
+          "to": "ticket_cycle",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "policy_version_id"
+          ],
+          "to": "sla_policy_version",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "rule_id"
+          ],
+          "to": "sla_rule",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "actor_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "ticket_sla_clock",
+      "module": "clock",
+      "description": "Estado materializado independiente para primera respuesta y resolución.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "cycle_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "metric",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "state",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "started_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "consumed_ms",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "checkpoint_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "due_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": "NULL si pausado; fecha calculada si corre"
+        },
+        {
+          "name": "last_due_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "breached_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": "Primer incumplimiento, irreversible"
+        },
+        {
+          "name": "completed_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "active_revision_number",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "nullable": false,
+          "note": "Control optimista, incremento atómico"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "cycle_id",
+          "metric"
+        ]
+      ],
+      "indexes": [
+        [
+          "state",
+          "due_at"
+        ]
+      ],
+      "checks": [
+        "consumed_ms >= 0",
+        "active_revision_number > 0",
+        "metric IN ('FIRST_RESPONSE','RESOLUTION')",
+        "state IN ('RUNNING','PAUSED','STOPPED','CANCELLED')"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "cycle_id"
+          ],
+          "to": "ticket_cycle",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "sla_clock_revision",
+      "module": "clock",
+      "description": "Presupuesto y calendario aplicados; crear otra fila al cambiar, no UPDATE.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "clock_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "revision_number",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "evaluation_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "target_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "calendar_version_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "target_ms",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "consumed_at_change_ms",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "effective_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "clock_id",
+          "revision_number"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "target_ms > 0",
+        "consumed_at_change_ms >= 0"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "clock_id"
+          ],
+          "to": "ticket_sla_clock",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "evaluation_id"
+          ],
+          "to": "sla_evaluation",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "target_id"
+          ],
+          "to": "sla_target",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "calendar_version_id"
+          ],
+          "to": "calendar_version",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "sla_pause",
+      "module": "clock",
+      "description": "Pausa autorizada por reloj. Intervalos [start,end); no doble descuento.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "clock_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "started_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ended_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "reason_code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "reason_text",
+          "type": "text",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "trigger_comment_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "started_by",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ended_by",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "auto_resume_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "review_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "dedupe_key",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        },
+        {
+          "name": "open_clock_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": "Clave generada: una fila activa por agregado",
+          "generated": "CASE WHEN ended_at IS NULL THEN clock_id ELSE NULL END"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "clock_id",
+          "dedupe_key"
+        ],
+        [
+          "open_clock_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "ended_at IS NULL OR ended_at >= started_at"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "clock_id"
+          ],
+          "to": "ticket_sla_clock",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "trigger_comment_id"
+          ],
+          "to": "ticket_comment",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "started_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "ended_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "sla_clock_event",
+      "module": "clock",
+      "description": "Traza del cálculo, checkpoint y vencimiento histórico antes/después.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "clock_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "sequence",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "event_type",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "occurred_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "delta_consumed_ms",
+          "type": "bigint",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "payload",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "source_event_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "clock_id",
+          "sequence"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "delta_consumed_ms >= 0"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "clock_id"
+          ],
+          "to": "ticket_sla_clock",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "source_event_id"
+          ],
+          "to": "ticket_event",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "sla_alert",
+      "module": "clock",
+      "description": "Dedupe de alertas por revisión; workers comprueban versión vigente.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "clock_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "revision_number",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "kind",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "scheduled_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "delivered_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "cancelled_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "clock_id",
+          "revision_number",
+          "kind"
+        ]
+      ],
+      "indexes": [
+        [
+          "scheduled_at",
+          "delivered_at"
+        ]
+      ],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "clock_id"
+          ],
+          "to": "ticket_sla_clock",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "outbox_event",
+      "module": "ops",
+      "description": "Evento durable para avisos; no publicar a SQS antes del commit.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "aggregate_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "event_type",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "payload",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "available_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "published_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "attempts",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "locked_until",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "lease_owner",
+          "type": "varchar(64)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [],
+      "indexes": [
+        [
+          "published_at",
+          "available_at"
+        ]
+      ],
+      "checks": [
+        "attempts >= 0"
+      ],
+      "refs": [],
+      "db": "arena"
+    },
+    {
+      "name": "consumer_receipt",
+      "module": "ops",
+      "description": "Idempotencia por consumidor y evento.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "consumer",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "event_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "consumer",
+          "event_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "arena"
+    },
+    {
+      "name": "notification",
+      "module": "ops",
+      "description": "Notificación con referencia; reautorizar al leer y al enviar.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "recipient_user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "ticket_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "source_event_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "kind",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "read_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "recipient_user_id",
+          "source_event_id",
+          "kind"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "recipient_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "ticket_id"
+          ],
+          "to": "ticket",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "notification_preference",
+      "module": "ops",
+      "description": "Preferencias por canal y clase de evento.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "channel",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "event_type",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "user_id",
+          "channel",
+          "event_type"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "notification_delivery",
+      "module": "ops",
+      "description": "Intentos de entrega y resultado del proveedor.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "notification_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "channel",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "attempt",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "provider_message_id",
+          "type": "varchar(160)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "sent_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "last_error_code",
+          "type": "varchar(64)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ],
+        [
+          "notification_id",
+          "channel",
+          "attempt"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "client_id",
+            "notification_id"
+          ],
+          "to": "notification",
+          "target": [
+            "client_id",
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "idempotency_record",
+      "module": "ops",
+      "description": "Clave por actor y operación; reautorizar todo replay.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "actor_user_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "operation",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "request_key",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "request_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "resource_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "actor_user_id",
+          "operation",
+          "request_key"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "actor_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "audit_event",
+      "module": "ops",
+      "description": "Auditoría restringida; retención separada y exportación inmutable.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "actor_user_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "resource_type",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "resource_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "action",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "request_id",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "payload_redacted",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "occurred_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [],
+      "indexes": [
+        [
+          "client_id",
+          "occurred_at"
+        ]
+      ],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "actor_user_id"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "export_job",
+      "module": "ops",
+      "description": "Exportación de alcance congelado, permiso revalidado antes de descargar.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "client_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "requested_by",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "filters",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "object_key",
+          "type": "varchar(512)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "client_id",
+          "id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "client_id"
+          ],
+          "to": "client",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "requested_by"
+          ],
+          "to": "app_user",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "arena"
+    },
+    {
+      "name": "auth_account",
+      "module": "identity",
+      "description": "Cuenta del proveedor propio de aprendizaje.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "email_normalized",
+          "type": "varchar(254)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "email_verified_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "token_version",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "email_normalized"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "identity"
+    },
+    {
+      "name": "auth_password",
+      "module": "identity",
+      "description": "Hash Argon2id o algoritmo aprobado; no contraseña reversible.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "account_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "encoded_hash",
+          "type": "varchar(512)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "changed_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "account_id"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "account_id"
+          ],
+          "to": "auth_account",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "identity"
+    },
+    {
+      "name": "auth_session",
+      "module": "identity",
+      "description": "Una familia de refresh por sesión/dispositivo.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "account_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "client_code",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "absolute_expires_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "idle_expires_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "revoked_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "revoke_reason",
+          "type": "varchar(64)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "last_seen_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "version",
+          "type": "int",
+          "nullable": false,
+          "note": "Control optimista, incremento atómico"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "account_id"
+          ],
+          "to": "auth_account",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "identity"
+    },
+    {
+      "name": "auth_refresh_token",
+      "module": "identity",
+      "description": "Token opaco aleatorio; hash en DB; rotación de un solo uso.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "session_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "generation",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "token_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "used_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "revoked_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "token_hash"
+        ],
+        [
+          "session_id",
+          "generation"
+        ]
+      ],
+      "indexes": [],
+      "checks": [
+        "generation >= 0"
+      ],
+      "refs": [
+        {
+          "columns": [
+            "session_id"
+          ],
+          "to": "auth_session",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "identity"
+    },
+    {
+      "name": "auth_one_time_token",
+      "module": "identity",
+      "description": "Verificación de email o recuperación, un uso con expiración.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "account_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "purpose",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "token_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "consumed_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "token_hash"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "account_id"
+          ],
+          "to": "auth_account",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "identity"
+    },
+    {
+      "name": "auth_mfa_credential",
+      "module": "identity",
+      "description": "WebAuthn pública o referencia a secreto cifrado TOTP.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "account_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "kind",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "credential_identifier",
+          "type": "varchar(255)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "public_data",
+          "type": "json",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "encrypted_secret_ref",
+          "type": "varchar(512)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "verified_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "revoked_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "credential_identifier"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "account_id"
+          ],
+          "to": "auth_account",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "identity"
+    },
+    {
+      "name": "auth_recovery_code",
+      "module": "identity",
+      "description": "Código de recuperación de un uso, hasheado.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "account_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "code_hash",
+          "type": "char(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "used_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "code_hash"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "account_id"
+          ],
+          "to": "auth_account",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "identity"
+    },
+    {
+      "name": "auth_signing_key",
+      "module": "identity",
+      "description": "Metadata kid; clave privada en KMS o secret store.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "kid",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "algorithm",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "public_jwk",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "private_key_ref",
+          "type": "varchar(512)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "active_from",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "retire_after",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "varchar(32)",
+          "nullable": false,
+          "note": "Enum de dominio validado en servidor"
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [
+        [
+          "kid"
+        ]
+      ],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "identity"
+    },
+    {
+      "name": "auth_security_event",
+      "module": "identity",
+      "description": "Login, recuperación, reutilización, revocación y cambios MFA.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "account_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "session_id",
+          "type": "char(36)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "event_type",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "occurred_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "details_redacted",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [],
+      "indexes": [],
+      "checks": [],
+      "refs": [
+        {
+          "columns": [
+            "account_id"
+          ],
+          "to": "auth_account",
+          "target": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "session_id"
+          ],
+          "to": "auth_session",
+          "target": [
+            "id"
+          ]
+        }
+      ],
+      "db": "identity"
+    },
+    {
+      "name": "auth_outbox_event",
+      "module": "identity",
+      "description": "Propaga revocaciones de forma idempotente; no sustituye validación online.",
+      "columns": [
+        {
+          "name": "id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": "Identificador UUID generado por aplicación"
+        },
+        {
+          "name": "event_type",
+          "type": "varchar(64)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "aggregate_id",
+          "type": "char(36)",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "payload",
+          "type": "json",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "published_at",
+          "type": "datetime(3)",
+          "nullable": true,
+          "note": ""
+        },
+        {
+          "name": "attempts",
+          "type": "int",
+          "nullable": false,
+          "note": ""
+        },
+        {
+          "name": "created_at",
+          "type": "datetime(3)",
+          "nullable": false,
+          "note": "Instante UTC"
+        }
+      ],
+      "unique": [],
+      "indexes": [],
+      "checks": [],
+      "refs": [],
+      "db": "identity"
+    }
+  ]
+}

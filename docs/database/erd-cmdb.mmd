@@ -1,0 +1,93 @@
+erDiagram
+    ci_class {
+        char_36_ id PK
+        varchar_64_ code
+        varchar_160_ name
+        varchar_32_ status
+    }
+    ci_schema_version {
+        char_36_ id PK
+        char_36_ class_id
+        int revision
+        json attribute_schema
+        varchar_32_ status
+        datetime_3_ published_at
+    }
+    configuration_item {
+        char_36_ id PK
+        char_36_ client_id
+        varchar_64_ ci_key
+        varchar_160_ name
+        char_36_ schema_version_id
+        char_36_ client_product_id
+        varchar_32_ environment
+        varchar_32_ criticality
+        varchar_32_ status
+        json attributes
+        char_36_ owner_area_id
+        char_36_ support_group_id
+        char_36_ technical_owner_user_id
+        varchar_64_ source_system
+        varchar_160_ external_id
+        int version
+    }
+    ci_project {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ci_id
+        char_36_ project_id
+    }
+    ci_relation_type {
+        char_36_ id PK
+        varchar_64_ code
+        varchar_160_ name
+        boolean allow_cycles
+    }
+    ci_relation {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ source_ci_id
+        char_36_ target_ci_id
+        char_36_ relation_type_id
+        varchar_32_ status
+        datetime_3_ valid_from
+        datetime_3_ valid_until
+    }
+    ci_service_link {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ci_id
+        char_36_ service_id
+        char_36_ subservice_id
+        varchar_32_ status
+        datetime_3_ valid_from
+        datetime_3_ valid_until
+    }
+    offering_ci {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ offering_id
+        char_36_ ci_id
+        varchar_32_ status
+    }
+    ci_class ||--o{ ci_schema_version : "class_id"
+    client ||--o{ configuration_item : ""
+    ci_schema_version ||--o{ configuration_item : "schema_version_id"
+    client_product |o--o{ configuration_item : "client_product_id"
+    area ||--o{ configuration_item : "owner_area_id"
+    resolver_group ||--o{ configuration_item : "support_group_id"
+    app_user |o--o{ configuration_item : "technical_owner_user_id"
+    client ||--o{ ci_project : ""
+    configuration_item ||--o{ ci_project : "ci_id"
+    project ||--o{ ci_project : "project_id"
+    client ||--o{ ci_relation : ""
+    configuration_item ||--o{ ci_relation : "source_ci_id"
+    configuration_item ||--o{ ci_relation : "target_ci_id"
+    ci_relation_type ||--o{ ci_relation : "relation_type_id"
+    client ||--o{ ci_service_link : ""
+    configuration_item ||--o{ ci_service_link : "ci_id"
+    service ||--o{ ci_service_link : "service_id"
+    subservice |o--o{ ci_service_link : "subservice_id"
+    client ||--o{ offering_ci : ""
+    service_offering ||--o{ offering_ci : "offering_id"
+    configuration_item ||--o{ offering_ci : "ci_id"

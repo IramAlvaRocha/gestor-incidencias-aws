@@ -1,0 +1,148 @@
+// Modelo objetivo identity. Nullable y referencias reales; sin FK entre servicios.
+// Expresiones generadas y CHECK completos: ver SQL.
+Project identity_target { database_type: 'MySQL' }
+
+Table auth_account {
+  Note: 'Cuenta del proveedor propio de aprendizaje.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  email_normalized varchar(254) [not null]
+  email_verified_at datetime(3)
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  token_version int [not null]
+  updated_at datetime(3) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (email_normalized) [unique]
+  }
+}
+
+Table auth_password {
+  Note: 'Hash Argon2id o algoritmo aprobado; no contraseña reversible.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  account_id char(36) [not null]
+  encoded_hash varchar(512) [not null]
+  changed_at datetime(3) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (account_id) [unique]
+  }
+}
+
+Table auth_session {
+  Note: 'Una familia de refresh por sesión/dispositivo.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  account_id char(36) [not null]
+  client_code varchar(64) [not null]
+  absolute_expires_at datetime(3) [not null]
+  idle_expires_at datetime(3) [not null]
+  revoked_at datetime(3)
+  revoke_reason varchar(64)
+  last_seen_at datetime(3) [not null]
+  version int [not null, note: 'Control optimista, incremento atómico']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+}
+
+Table auth_refresh_token {
+  Note: 'Token opaco aleatorio; hash en DB; rotación de un solo uso.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  session_id char(36) [not null]
+  generation int [not null]
+  token_hash char(64) [not null]
+  expires_at datetime(3) [not null]
+  used_at datetime(3)
+  revoked_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (token_hash) [unique]
+    (session_id, generation) [unique]
+  }
+}
+
+Table auth_one_time_token {
+  Note: 'Verificación de email o recuperación, un uso con expiración.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  account_id char(36) [not null]
+  purpose varchar(64) [not null]
+  token_hash char(64) [not null]
+  expires_at datetime(3) [not null]
+  consumed_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (token_hash) [unique]
+  }
+}
+
+Table auth_mfa_credential {
+  Note: 'WebAuthn pública o referencia a secreto cifrado TOTP.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  account_id char(36) [not null]
+  kind varchar(32) [not null]
+  credential_identifier varchar(255) [not null]
+  public_data json
+  encrypted_secret_ref varchar(512)
+  verified_at datetime(3)
+  revoked_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (credential_identifier) [unique]
+  }
+}
+
+Table auth_recovery_code {
+  Note: 'Código de recuperación de un uso, hasheado.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  account_id char(36) [not null]
+  code_hash char(64) [not null]
+  used_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (code_hash) [unique]
+  }
+}
+
+Table auth_signing_key {
+  Note: 'Metadata kid; clave privada en KMS o secret store.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  kid varchar(64) [not null]
+  algorithm varchar(64) [not null]
+  public_jwk json [not null]
+  private_key_ref varchar(512) [not null]
+  active_from datetime(3) [not null]
+  retire_after datetime(3)
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (kid) [unique]
+  }
+}
+
+Table auth_security_event {
+  Note: 'Login, recuperación, reutilización, revocación y cambios MFA.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  account_id char(36)
+  session_id char(36)
+  event_type varchar(64) [not null]
+  occurred_at datetime(3) [not null]
+  details_redacted json [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+}
+
+Table auth_outbox_event {
+  Note: 'Propaga revocaciones de forma idempotente; no sustituye validación online.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  event_type varchar(64) [not null]
+  aggregate_id char(36) [not null]
+  payload json [not null]
+  published_at datetime(3)
+  attempts int [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+}
+
+Ref: auth_password.(account_id) > auth_account.(id)
+Ref: auth_session.(account_id) > auth_account.(id)
+Ref: auth_refresh_token.(session_id) > auth_session.(id)
+Ref: auth_one_time_token.(account_id) > auth_account.(id)
+Ref: auth_mfa_credential.(account_id) > auth_account.(id)
+Ref: auth_recovery_code.(account_id) > auth_account.(id)
+Ref: auth_security_event.(account_id) > auth_account.(id)
+Ref: auth_security_event.(session_id) > auth_session.(id)

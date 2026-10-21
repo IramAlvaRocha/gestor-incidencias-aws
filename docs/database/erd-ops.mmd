@@ -1,0 +1,85 @@
+erDiagram
+    outbox_event {
+        char_36_ id PK
+        char_36_ aggregate_id
+        varchar_64_ event_type
+        json payload
+        datetime_3_ available_at
+        datetime_3_ published_at
+        int attempts
+        datetime_3_ locked_until
+        varchar_64_ lease_owner
+    }
+    consumer_receipt {
+        char_36_ id PK
+        varchar_64_ consumer
+        char_36_ event_id
+    }
+    notification {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ recipient_user_id
+        char_36_ ticket_id
+        char_36_ source_event_id
+        varchar_64_ kind
+        datetime_3_ read_at
+    }
+    notification_preference {
+        char_36_ id PK
+        char_36_ user_id
+        varchar_32_ channel
+        varchar_64_ event_type
+        boolean enabled
+    }
+    notification_delivery {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ notification_id
+        varchar_32_ channel
+        int attempt
+        varchar_32_ status
+        varchar_160_ provider_message_id
+        datetime_3_ sent_at
+        varchar_64_ last_error_code
+    }
+    idempotency_record {
+        char_36_ id PK
+        char_36_ actor_user_id
+        varchar_64_ operation
+        varchar_64_ request_key
+        char_64_ request_hash
+        char_36_ resource_id
+        varchar_32_ status
+        datetime_3_ expires_at
+    }
+    audit_event {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ actor_user_id
+        varchar_64_ resource_type
+        char_36_ resource_id
+        varchar_64_ action
+        varchar_64_ request_id
+        json payload_redacted
+        datetime_3_ occurred_at
+    }
+    export_job {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ requested_by
+        json filters
+        varchar_32_ status
+        varchar_512_ object_key
+        datetime_3_ expires_at
+    }
+    client ||--o{ notification : ""
+    app_user ||--o{ notification : "recipient_user_id"
+    ticket |o--o{ notification : "ticket_id"
+    app_user ||--o{ notification_preference : "user_id"
+    client ||--o{ notification_delivery : ""
+    notification ||--o{ notification_delivery : "notification_id"
+    app_user ||--o{ idempotency_record : "actor_user_id"
+    client |o--o{ audit_event : ""
+    app_user |o--o{ audit_event : "actor_user_id"
+    client ||--o{ export_job : ""
+    app_user ||--o{ export_job : "requested_by"

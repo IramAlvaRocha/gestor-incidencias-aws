@@ -1,0 +1,117 @@
+erDiagram
+    ticket_cycle {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        int cycle_number
+        datetime_3_ started_at
+        datetime_3_ ended_at
+        varchar_32_ outcome
+        text reason
+    }
+    sla_evaluation {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        char_36_ cycle_id
+        char_36_ policy_version_id
+        char_36_ rule_id
+        json input_snapshot
+        json result_snapshot
+        datetime_3_ evaluated_at
+        varchar_64_ engine_version
+        text reason
+        char_36_ actor_user_id
+    }
+    ticket_sla_clock {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ ticket_id
+        char_36_ cycle_id
+        varchar_32_ metric
+        varchar_32_ state
+        datetime_3_ started_at
+        bigint consumed_ms
+        datetime_3_ checkpoint_at
+        datetime_3_ due_at
+        datetime_3_ last_due_at
+        datetime_3_ breached_at
+        datetime_3_ completed_at
+        int active_revision_number
+        int version
+    }
+    sla_clock_revision {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ clock_id
+        int revision_number
+        char_36_ evaluation_id
+        char_36_ target_id
+        char_36_ calendar_version_id
+        bigint target_ms
+        bigint consumed_at_change_ms
+        datetime_3_ effective_at
+        text reason
+    }
+    sla_pause {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ clock_id
+        datetime_3_ started_at
+        datetime_3_ ended_at
+        varchar_64_ reason_code
+        text reason_text
+        char_36_ trigger_comment_id
+        char_36_ started_by
+        char_36_ ended_by
+        datetime_3_ auto_resume_at
+        datetime_3_ review_at
+        varchar_64_ dedupe_key
+    }
+    sla_clock_event {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ clock_id
+        bigint sequence
+        varchar_64_ event_type
+        datetime_3_ occurred_at
+        bigint delta_consumed_ms
+        json payload
+        char_36_ source_event_id
+    }
+    sla_alert {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ clock_id
+        int revision_number
+        varchar_64_ kind
+        datetime_3_ scheduled_at
+        datetime_3_ delivered_at
+        datetime_3_ cancelled_at
+    }
+    client ||--o{ ticket_cycle : ""
+    ticket ||--o{ ticket_cycle : "ticket_id"
+    client ||--o{ sla_evaluation : ""
+    ticket ||--o{ sla_evaluation : "ticket_id"
+    ticket_cycle ||--o{ sla_evaluation : "cycle_id"
+    sla_policy_version ||--o{ sla_evaluation : "policy_version_id"
+    sla_rule ||--o{ sla_evaluation : "rule_id"
+    app_user |o--o{ sla_evaluation : "actor_user_id"
+    client ||--o{ ticket_sla_clock : ""
+    ticket ||--o{ ticket_sla_clock : "ticket_id"
+    ticket_cycle ||--o{ ticket_sla_clock : "cycle_id"
+    client ||--o{ sla_clock_revision : ""
+    ticket_sla_clock ||--o{ sla_clock_revision : "clock_id"
+    sla_evaluation ||--o{ sla_clock_revision : "evaluation_id"
+    sla_target ||--o{ sla_clock_revision : "target_id"
+    calendar_version ||--o{ sla_clock_revision : "calendar_version_id"
+    client ||--o{ sla_pause : ""
+    ticket_sla_clock ||--o{ sla_pause : "clock_id"
+    ticket_comment |o--o{ sla_pause : "trigger_comment_id"
+    app_user ||--o{ sla_pause : "started_by"
+    app_user |o--o{ sla_pause : "ended_by"
+    client ||--o{ sla_clock_event : ""
+    ticket_sla_clock ||--o{ sla_clock_event : "clock_id"
+    ticket_event |o--o{ sla_clock_event : "source_event_id"
+    client ||--o{ sla_alert : ""
+    ticket_sla_clock ||--o{ sla_alert : "clock_id"

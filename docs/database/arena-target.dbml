@@ -1,0 +1,1251 @@
+// Modelo objetivo arena. Nullable y referencias reales; sin FK entre servicios.
+// Expresiones generadas y CHECK completos: ver SQL.
+Project arena_target { database_type: 'MySQL' }
+
+Table app_user {
+  Note: 'Perfil local estable; conserva los UUID de User.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  display_name varchar(160) [not null]
+  email_display varchar(254) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  version int [not null, note: 'Control optimista, incremento atómico']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+}
+
+Table identity_link {
+  Note: 'Vincula cuenta local a un emisor; no unir por email.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  user_id char(36) [not null]
+  issuer varchar(255) [not null]
+  subject varchar(255) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (issuer, subject) [unique]
+  }
+}
+
+Table employee {
+  Note: 'Empleado de la agencia y rol administrativo global.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  user_id char(36) [not null]
+  agency_role varchar(32) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (user_id) [unique]
+  }
+}
+
+Table client {
+  Note: 'Frontera comercial de una instalación con una agencia.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  name varchar(160) [not null]
+  slug varchar(64) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  version int [not null, note: 'Control optimista, incremento atómico']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (slug) [unique]
+  }
+}
+
+Table requester_level {
+  Note: 'Nivel de servicio, separado del permiso.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  code varchar(64) [not null]
+  name varchar(160) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (client_id, code) [unique]
+  }
+}
+
+Table client_contact {
+  Note: 'Relación vigente entre usuario y cliente.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  user_id char(36) [not null]
+  requester_level_id char(36)
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (client_id, user_id) [unique]
+  }
+}
+
+Table project {
+  Note: 'Proyecto privado; no trasladar entre clientes.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  name varchar(160) [not null]
+  project_key varchar(64) [not null]
+  manager_user_id char(36) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  version int [not null, note: 'Control optimista, incremento atómico']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (project_key) [unique]
+  }
+}
+
+Table project_member {
+  Note: 'Rol y nivel efectivo opcional por proyecto.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  project_id char(36) [not null]
+  user_id char(36) [not null]
+  role varchar(32) [not null]
+  requester_level_id char(36)
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  valid_from datetime(3) [not null]
+  valid_until datetime(3) [note: 'Límite exclusivo']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (project_id, user_id) [unique]
+  }
+}
+
+Table project_counter {
+  Note: 'Contador transaccional; nunca COUNT + 1.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  project_id char(36) [not null]
+  next_number bigint [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (project_id) [unique]
+  }
+}
+
+Table invitation {
+  Note: 'Invitación de un uso; solo hash del token.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  project_id char(36) [not null]
+  email_normalized varchar(254) [not null]
+  role varchar(32) [not null]
+  token_hash char(64) [not null]
+  expires_at datetime(3) [not null]
+  accepted_at datetime(3)
+  revoked_at datetime(3)
+  invited_by char(36) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (token_hash) [unique]
+  }
+}
+
+Table area {
+  Note: 'Área interna de atención.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  code varchar(64) [not null]
+  name varchar(160) [not null]
+  owner_user_id char(36) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (code) [unique]
+  }
+}
+
+Table resolver_group {
+  Note: 'Cola con propietario y respaldo.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  area_id char(36) [not null]
+  code varchar(64) [not null]
+  name varchar(160) [not null]
+  lead_user_id char(36) [not null]
+  backup_user_id char(36)
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (code) [unique]
+  }
+}
+
+Table group_member {
+  Note: 'Miembro de grupo; no concede acceso a proyectos.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  group_id char(36) [not null]
+  user_id char(36) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (group_id, user_id) [unique]
+  }
+}
+
+Table project_group {
+  Note: 'Grupos habilitados para recibir trabajo del proyecto.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  project_id char(36) [not null]
+  group_id char(36) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (project_id, group_id) [unique]
+  }
+}
+
+Table product {
+  Note: 'Definición del producto, no su instancia.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  code varchar(64) [not null]
+  name varchar(160) [not null]
+  vendor varchar(160)
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (code) [unique]
+  }
+}
+
+Table client_product {
+  Note: 'Producto contratado por cliente con vigencia.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  product_id char(36) [not null]
+  contract_reference varchar(160)
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  valid_from datetime(3) [not null]
+  valid_until datetime(3) [note: 'Límite exclusivo']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+  }
+}
+
+Table service_category {
+  Note: 'Agrupación del catálogo de la agencia.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  code varchar(64) [not null]
+  name varchar(160) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (code) [unique]
+  }
+}
+
+Table service {
+  Note: 'Servicio estable compartido como plantilla.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  category_id char(36) [not null]
+  code varchar(64) [not null]
+  name varchar(160) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (code) [unique]
+  }
+}
+
+Table subservice {
+  Note: 'Identidad estable del subservicio.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  service_id char(36) [not null]
+  code varchar(64) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (service_id, code) [unique]
+  }
+}
+
+Table subservice_version {
+  Note: 'Versión publicada inmutable del formulario y defaults.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  subservice_id char(36) [not null]
+  revision int [not null]
+  name varchar(160) [not null]
+  description text [not null]
+  request_type varchar(32) [not null]
+  form_schema json [not null, note: 'JSON Schema validado; no ejecutar código']
+  default_group_id char(36) [not null]
+  requires_ci boolean [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  published_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (subservice_id, revision) [unique]
+  }
+}
+
+Table service_offering {
+  Note: 'Oferta y cobertura por proyecto; publicar nueva fila al cambiar contrato.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  project_id char(36) [not null]
+  subservice_version_id char(36) [not null]
+  client_product_id char(36)
+  routing_version_id char(36)
+  sla_policy_version_id char(36)
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  valid_from datetime(3) [not null]
+  valid_until datetime(3) [note: 'Límite exclusivo']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+  }
+}
+
+Table offering_level {
+  Note: 'Niveles permitidos para esta oferta; filas explícitas, vacío deniega.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  offering_id char(36) [not null]
+  requester_level_id char(36) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (offering_id, requester_level_id) [unique]
+  }
+}
+
+Table ci_class {
+  Note: 'Aplicación, base de datos, servidor, integración.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  code varchar(64) [not null]
+  name varchar(160) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (code) [unique]
+  }
+}
+
+Table ci_schema_version {
+  Note: 'Esquema tipado y clasificación de atributos.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  class_id char(36) [not null]
+  revision int [not null]
+  attribute_schema json [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  published_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (class_id, revision) [unique]
+  }
+}
+
+Table configuration_item {
+  Note: 'Instancia concreta propiedad de un cliente.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ci_key varchar(64) [not null]
+  name varchar(160) [not null]
+  schema_version_id char(36) [not null]
+  client_product_id char(36)
+  environment varchar(32) [not null]
+  criticality varchar(32) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  attributes json [not null]
+  owner_area_id char(36) [not null]
+  support_group_id char(36) [not null]
+  technical_owner_user_id char(36)
+  source_system varchar(64) [not null]
+  external_id varchar(160) [not null]
+  version int [not null, note: 'Control optimista, incremento atómico']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (client_id, ci_key) [unique]
+    (client_id, source_system, external_id) [unique]
+  }
+}
+
+Table ci_project {
+  Note: 'CI visible en un proyecto autorizado.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ci_id char(36) [not null]
+  project_id char(36) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (ci_id, project_id) [unique]
+  }
+}
+
+Table ci_relation_type {
+  Note: 'Dirección y política de ciclos de una dependencia.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  code varchar(64) [not null]
+  name varchar(160) [not null]
+  allow_cycles boolean [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (code) [unique]
+  }
+}
+
+Table ci_relation {
+  Note: 'Arista dirigida; prohibir duplicados y autorrelaciones.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  source_ci_id char(36) [not null]
+  target_ci_id char(36) [not null]
+  relation_type_id char(36) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  valid_from datetime(3) [not null]
+  valid_until datetime(3) [note: 'Límite exclusivo']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (source_ci_id, target_ci_id, relation_type_id) [unique]
+  }
+}
+
+Table ci_service_link {
+  Note: 'CI vinculado a servicio o subservicio; validar coherencia entre ambos.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ci_id char(36) [not null]
+  service_id char(36) [not null]
+  subservice_id char(36)
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  valid_from datetime(3) [not null]
+  valid_until datetime(3) [note: 'Límite exclusivo']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+  }
+}
+
+Table offering_ci {
+  Note: 'Intersección autorizada oferta-proyecto-CI.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  offering_id char(36) [not null]
+  ci_id char(36) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (offering_id, ci_id) [unique]
+  }
+}
+
+Table business_calendar {
+  Note: 'Identidad del calendario; compartible, sin datos del cliente.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  code varchar(64) [not null]
+  name varchar(160) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (code) [unique]
+  }
+}
+
+Table calendar_version {
+  Note: 'Reglas congeladas y cobertura de cálculo.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  calendar_id char(36) [not null]
+  revision int [not null]
+  timezone varchar(160) [not null]
+  tzdb_version varchar(64) [not null]
+  engine_version varchar(64) [not null]
+  coverage_start date [not null]
+  coverage_end date [not null]
+  content_hash char(64) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  published_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (calendar_id, revision) [unique]
+  }
+}
+
+Table calendar_week_interval {
+  Note: 'Intervalos locales [inicio, fin); turnos nocturnos se dividen.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  calendar_version_id char(36) [not null]
+  weekday_iso int [not null]
+  start_minute int [not null]
+  end_minute int [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+}
+
+Table calendar_exception {
+  Note: 'Reemplaza toda la jornada de esa fecha civil; sin intervalos significa cerrado.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  calendar_version_id char(36) [not null]
+  local_date date [not null]
+  name varchar(160) [not null]
+  recurrence_source json [note: 'Regla expandida al publicar']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (calendar_version_id, local_date) [unique]
+  }
+}
+
+Table calendar_exception_interval {
+  Note: 'Ventanas de apertura de la excepción.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  exception_id char(36) [not null]
+  start_minute int [not null]
+  end_minute int [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+}
+
+Table calendar_work_interval {
+  Note: 'Ventanas UTC compiladas; reproducibilidad frente a cambios de tzdb.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  calendar_version_id char(36) [not null]
+  start_at datetime(3) [not null]
+  end_at datetime(3) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (calendar_version_id, start_at) [unique]
+    (calendar_version_id, end_at)
+  }
+}
+
+Table sla_policy_set {
+  Note: 'Conjunto contractual de reglas por cliente.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  name varchar(160) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+  }
+}
+
+Table sla_policy_version {
+  Note: 'Publicación atómica de reglas ordenadas y fallback.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  policy_set_id char(36) [not null]
+  revision int [not null]
+  effective_from datetime(3) [not null]
+  engine_version varchar(64) [not null]
+  content_hash char(64) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  published_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (policy_set_id, revision) [unique]
+  }
+}
+
+Table sla_rule {
+  Note: 'Primera regla coincidente por orden único; condiciones AND tipadas.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  policy_version_id char(36) [not null]
+  rule_order int [not null]
+  name varchar(160) [not null]
+  conditions json [not null]
+  priority varchar(32) [not null]
+  is_fallback boolean [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (policy_version_id, rule_order) [unique]
+  }
+}
+
+Table sla_target {
+  Note: 'Objetivo independiente por métrica; duraciones enteras.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  rule_id char(36) [not null]
+  metric varchar(32) [not null]
+  target_ms bigint [not null]
+  calendar_version_id char(36) [not null]
+  pause_reasons json [not null]
+  max_pause_ms bigint
+  warning_thresholds json [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (rule_id, metric) [unique]
+  }
+}
+
+Table routing_version {
+  Note: 'Reglas publicadas de distribución interna.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  name varchar(160) [not null]
+  revision int [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  published_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+  }
+}
+
+Table routing_rule {
+  Note: 'Asignación a grupo; persona opcional, sin alterar SLA.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  routing_version_id char(36) [not null]
+  rule_order int [not null]
+  conditions json [not null]
+  group_id char(36) [not null]
+  assignee_user_id char(36)
+  fallback_group_id char(36)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (routing_version_id, rule_order) [unique]
+  }
+}
+
+Table ticket {
+  Note: 'Solicitud; columnas opcionales permiten incorporación gradual y tickets legacy.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  project_id char(36) [not null]
+  number bigint [not null]
+  ticket_key varchar(64) [not null]
+  title varchar(160) [not null]
+  description text [not null]
+  type varchar(32) [not null]
+  priority varchar(32) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  visibility varchar(32) [not null]
+  reporter_user_id char(36) [not null]
+  created_by char(36) [not null]
+  offering_id char(36)
+  requester_level_id char(36)
+  impact varchar(32)
+  urgency varchar(32)
+  classification_snapshot json
+  current_group_id char(36)
+  assignee_user_id char(36)
+  sla_mode varchar(32) [not null, note: 'ACTIVE, NONE o LEGACY_UNMEASURED; ausencia explícita, nunca SLA cero']
+  resolution_code varchar(64)
+  resolution_summary text
+  cancellation_reason text
+  accepted_at datetime(3) [not null]
+  resolved_at datetime(3)
+  closed_at datetime(3)
+  updated_at datetime(3) [not null]
+  version int [not null, note: 'Control optimista, incremento atómico']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (project_id, number) [unique]
+    (ticket_key) [unique]
+    (client_id, project_id, status, updated_at)
+    (assignee_user_id, status)
+  }
+}
+
+Table ticket_ci {
+  Note: 'CI afectado, principal o secundario; nunca duplicado.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  ci_id char(36) [not null]
+  is_primary boolean [not null]
+  snapshot json [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (ticket_id, ci_id) [unique]
+  }
+}
+
+Table ticket_comment {
+  Note: 'Comentario público o nota interna; sin borrado cascada.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  author_user_id char(36) [not null]
+  visibility varchar(32) [not null]
+  body text [not null]
+  edited_at datetime(3)
+  version int [not null, note: 'Control optimista, incremento atómico']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+  }
+}
+
+Table attachment {
+  Note: 'Metadatos y visibilidad; archivo privado en S3.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  comment_id char(36)
+  uploaded_by char(36) [not null]
+  object_key varchar(512) [not null]
+  file_name varchar(160) [not null]
+  content_type varchar(160) [not null]
+  size_bytes bigint [not null]
+  checksum char(64)
+  visibility varchar(32) [not null]
+  scan_status varchar(32) [not null]
+  verified_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+  }
+}
+
+Table ticket_participant {
+  Note: 'Participante concede alcance; follower solo notifica.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  user_id char(36) [not null]
+  kind varchar(32) [not null]
+  added_by char(36) [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (ticket_id, user_id, kind) [unique]
+  }
+}
+
+Table ticket_relation {
+  Note: 'Relación autorizada entre tickets; ciclos según tipo.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  source_ticket_id char(36) [not null]
+  target_ticket_id char(36) [not null]
+  kind varchar(32) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (source_ticket_id, target_ticket_id, kind) [unique]
+  }
+}
+
+Table tag {
+  Note: 'Etiqueta de proyecto.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  project_id char(36) [not null]
+  name varchar(30) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (project_id, name) [unique]
+  }
+}
+
+Table ticket_tag {
+  Note: 'Etiquetas del ticket.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  tag_id char(36) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (ticket_id, tag_id) [unique]
+  }
+}
+
+Table ticket_event {
+  Note: 'Hecho inmutable con versión por agregado y proyección pública revisada.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  sequence bigint [not null]
+  event_type varchar(64) [not null]
+  actor_user_id char(36)
+  occurred_at datetime(3) [not null]
+  visibility varchar(32) [not null]
+  payload json [not null]
+  request_id varchar(64) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (ticket_id, sequence) [unique]
+    (ticket_id, occurred_at)
+  }
+}
+
+Table ticket_assignment {
+  Note: 'Historia de custodios. La cola actual conserva el ticket durante transferencia.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  group_id char(36) [not null]
+  assignee_user_id char(36)
+  started_at datetime(3) [not null]
+  ended_at datetime(3)
+  reason text [not null]
+  assigned_by char(36) [not null]
+  routing_rule_id char(36)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  open_ticket_id char(36) [note: 'Clave generada: una fila activa por agregado']
+  indexes {
+    (client_id, id) [unique]
+    (open_ticket_id) [unique]
+  }
+}
+
+Table ticket_transfer {
+  Note: 'Solicitar, aceptar, declinar o cancelar traslado; no es rechazo del ticket.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  from_assignment_id char(36) [not null]
+  to_group_id char(36) [not null]
+  requested_by char(36) [not null]
+  reason text [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  decided_by char(36)
+  decision_reason text
+  decided_at datetime(3)
+  review_due_at datetime(3) [not null]
+  result_assignment_id char(36)
+  version int [not null, note: 'Control optimista, incremento atómico']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  pending_ticket_id char(36) [note: 'Clave generada: una fila activa por agregado']
+  indexes {
+    (client_id, id) [unique]
+    (pending_ticket_id) [unique]
+  }
+}
+
+Table ticket_cycle {
+  Note: 'Ciclo 1 al aceptar; siguientes al reabrir con motivo.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  cycle_number int [not null]
+  started_at datetime(3) [not null]
+  ended_at datetime(3)
+  outcome varchar(32)
+  reason text
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  open_ticket_id char(36) [note: 'Clave generada: una fila activa por agregado']
+  indexes {
+    (client_id, id) [unique]
+    (ticket_id, cycle_number) [unique]
+    (open_ticket_id) [unique]
+  }
+}
+
+Table sla_evaluation {
+  Note: 'Entrada y resultado congelados; también registra overrides y migraciones.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  cycle_id char(36) [not null]
+  policy_version_id char(36) [not null]
+  rule_id char(36) [not null]
+  input_snapshot json [not null]
+  result_snapshot json [not null]
+  evaluated_at datetime(3) [not null]
+  engine_version varchar(64) [not null]
+  reason text [not null]
+  actor_user_id char(36)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+  }
+}
+
+Table ticket_sla_clock {
+  Note: 'Estado materializado independiente para primera respuesta y resolución.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  ticket_id char(36) [not null]
+  cycle_id char(36) [not null]
+  metric varchar(32) [not null]
+  state varchar(32) [not null]
+  started_at datetime(3) [not null]
+  consumed_ms bigint [not null]
+  checkpoint_at datetime(3) [not null]
+  due_at datetime(3) [note: 'NULL si pausado; fecha calculada si corre']
+  last_due_at datetime(3)
+  breached_at datetime(3) [note: 'Primer incumplimiento, irreversible']
+  completed_at datetime(3)
+  active_revision_number int [not null]
+  version int [not null, note: 'Control optimista, incremento atómico']
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (cycle_id, metric) [unique]
+    (state, due_at)
+  }
+}
+
+Table sla_clock_revision {
+  Note: 'Presupuesto y calendario aplicados; crear otra fila al cambiar, no UPDATE.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  clock_id char(36) [not null]
+  revision_number int [not null]
+  evaluation_id char(36) [not null]
+  target_id char(36) [not null]
+  calendar_version_id char(36) [not null]
+  target_ms bigint [not null]
+  consumed_at_change_ms bigint [not null]
+  effective_at datetime(3) [not null]
+  reason text [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (clock_id, revision_number) [unique]
+  }
+}
+
+Table sla_pause {
+  Note: 'Pausa autorizada por reloj. Intervalos [start,end); no doble descuento.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  clock_id char(36) [not null]
+  started_at datetime(3) [not null]
+  ended_at datetime(3)
+  reason_code varchar(64) [not null]
+  reason_text text [not null]
+  trigger_comment_id char(36)
+  started_by char(36) [not null]
+  ended_by char(36)
+  auto_resume_at datetime(3)
+  review_at datetime(3)
+  dedupe_key varchar(64) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  open_clock_id char(36) [note: 'Clave generada: una fila activa por agregado']
+  indexes {
+    (client_id, id) [unique]
+    (clock_id, dedupe_key) [unique]
+    (open_clock_id) [unique]
+  }
+}
+
+Table sla_clock_event {
+  Note: 'Traza del cálculo, checkpoint y vencimiento histórico antes/después.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  clock_id char(36) [not null]
+  sequence bigint [not null]
+  event_type varchar(64) [not null]
+  occurred_at datetime(3) [not null]
+  delta_consumed_ms bigint [not null]
+  payload json [not null]
+  source_event_id char(36)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (clock_id, sequence) [unique]
+  }
+}
+
+Table sla_alert {
+  Note: 'Dedupe de alertas por revisión; workers comprueban versión vigente.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  clock_id char(36) [not null]
+  revision_number int [not null]
+  kind varchar(64) [not null]
+  scheduled_at datetime(3) [not null]
+  delivered_at datetime(3)
+  cancelled_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (clock_id, revision_number, kind) [unique]
+    (scheduled_at, delivered_at)
+  }
+}
+
+Table outbox_event {
+  Note: 'Evento durable para avisos; no publicar a SQS antes del commit.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  aggregate_id char(36) [not null]
+  event_type varchar(64) [not null]
+  payload json [not null]
+  available_at datetime(3) [not null]
+  published_at datetime(3)
+  attempts int [not null]
+  locked_until datetime(3)
+  lease_owner varchar(64)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (published_at, available_at)
+  }
+}
+
+Table consumer_receipt {
+  Note: 'Idempotencia por consumidor y evento.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  consumer varchar(64) [not null]
+  event_id char(36) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (consumer, event_id) [unique]
+  }
+}
+
+Table notification {
+  Note: 'Notificación con referencia; reautorizar al leer y al enviar.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  recipient_user_id char(36) [not null]
+  ticket_id char(36)
+  source_event_id char(36) [not null]
+  kind varchar(64) [not null]
+  read_at datetime(3)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (recipient_user_id, source_event_id, kind) [unique]
+  }
+}
+
+Table notification_preference {
+  Note: 'Preferencias por canal y clase de evento.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  user_id char(36) [not null]
+  channel varchar(32) [not null]
+  event_type varchar(64) [not null]
+  enabled boolean [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (user_id, channel, event_type) [unique]
+  }
+}
+
+Table notification_delivery {
+  Note: 'Intentos de entrega y resultado del proveedor.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  notification_id char(36) [not null]
+  channel varchar(32) [not null]
+  attempt int [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  provider_message_id varchar(160)
+  sent_at datetime(3)
+  last_error_code varchar(64)
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+    (notification_id, channel, attempt) [unique]
+  }
+}
+
+Table idempotency_record {
+  Note: 'Clave por actor y operación; reautorizar todo replay.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  actor_user_id char(36) [not null]
+  operation varchar(64) [not null]
+  request_key varchar(64) [not null]
+  request_hash char(64) [not null]
+  resource_id char(36)
+  status varchar(32) [not null]
+  expires_at datetime(3) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (actor_user_id, operation, request_key) [unique]
+  }
+}
+
+Table audit_event {
+  Note: 'Auditoría restringida; retención separada y exportación inmutable.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36)
+  actor_user_id char(36)
+  resource_type varchar(64) [not null]
+  resource_id char(36)
+  action varchar(64) [not null]
+  request_id varchar(64) [not null]
+  payload_redacted json [not null]
+  occurred_at datetime(3) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, occurred_at)
+  }
+}
+
+Table export_job {
+  Note: 'Exportación de alcance congelado, permiso revalidado antes de descargar.'
+  id char(36) [pk, not null, note: 'Identificador UUID generado por aplicación']
+  client_id char(36) [not null]
+  requested_by char(36) [not null]
+  filters json [not null]
+  status varchar(32) [not null, note: 'Enum de dominio validado en servidor']
+  object_key varchar(512)
+  expires_at datetime(3) [not null]
+  created_at datetime(3) [not null, note: 'Instante UTC']
+  indexes {
+    (client_id, id) [unique]
+  }
+}
+
+Ref: identity_link.(user_id) > app_user.(id)
+Ref: employee.(user_id) > app_user.(id)
+Ref: requester_level.(client_id) > client.(id)
+Ref: client_contact.(client_id) > client.(id)
+Ref: client_contact.(user_id) > app_user.(id)
+Ref: client_contact.(client_id, requester_level_id) > requester_level.(client_id, id)
+Ref: project.(client_id) > client.(id)
+Ref: project.(manager_user_id) > app_user.(id)
+Ref: project_member.(client_id) > client.(id)
+Ref: project_member.(client_id, project_id) > project.(client_id, id)
+Ref: project_member.(user_id) > app_user.(id)
+Ref: project_member.(client_id, requester_level_id) > requester_level.(client_id, id)
+Ref: project_counter.(project_id) > project.(id)
+Ref: invitation.(client_id) > client.(id)
+Ref: invitation.(client_id, project_id) > project.(client_id, id)
+Ref: invitation.(invited_by) > app_user.(id)
+Ref: area.(owner_user_id) > app_user.(id)
+Ref: resolver_group.(area_id) > area.(id)
+Ref: resolver_group.(lead_user_id) > app_user.(id)
+Ref: resolver_group.(backup_user_id) > app_user.(id)
+Ref: group_member.(group_id) > resolver_group.(id)
+Ref: group_member.(user_id) > app_user.(id)
+Ref: project_group.(client_id) > client.(id)
+Ref: project_group.(client_id, project_id) > project.(client_id, id)
+Ref: project_group.(group_id) > resolver_group.(id)
+Ref: client_product.(client_id) > client.(id)
+Ref: client_product.(product_id) > product.(id)
+Ref: service.(category_id) > service_category.(id)
+Ref: subservice.(service_id) > service.(id)
+Ref: subservice_version.(subservice_id) > subservice.(id)
+Ref: subservice_version.(default_group_id) > resolver_group.(id)
+Ref: service_offering.(client_id) > client.(id)
+Ref: service_offering.(client_id, project_id) > project.(client_id, id)
+Ref: service_offering.(subservice_version_id) > subservice_version.(id)
+Ref: service_offering.(client_id, client_product_id) > client_product.(client_id, id)
+Ref: service_offering.(client_id, routing_version_id) > routing_version.(client_id, id)
+Ref: service_offering.(client_id, sla_policy_version_id) > sla_policy_version.(client_id, id)
+Ref: offering_level.(client_id) > client.(id)
+Ref: offering_level.(client_id, offering_id) > service_offering.(client_id, id)
+Ref: offering_level.(client_id, requester_level_id) > requester_level.(client_id, id)
+Ref: ci_schema_version.(class_id) > ci_class.(id)
+Ref: configuration_item.(client_id) > client.(id)
+Ref: configuration_item.(schema_version_id) > ci_schema_version.(id)
+Ref: configuration_item.(client_id, client_product_id) > client_product.(client_id, id)
+Ref: configuration_item.(owner_area_id) > area.(id)
+Ref: configuration_item.(support_group_id) > resolver_group.(id)
+Ref: configuration_item.(technical_owner_user_id) > app_user.(id)
+Ref: ci_project.(client_id) > client.(id)
+Ref: ci_project.(client_id, ci_id) > configuration_item.(client_id, id)
+Ref: ci_project.(client_id, project_id) > project.(client_id, id)
+Ref: ci_relation.(client_id) > client.(id)
+Ref: ci_relation.(client_id, source_ci_id) > configuration_item.(client_id, id)
+Ref: ci_relation.(client_id, target_ci_id) > configuration_item.(client_id, id)
+Ref: ci_relation.(relation_type_id) > ci_relation_type.(id)
+Ref: ci_service_link.(client_id) > client.(id)
+Ref: ci_service_link.(client_id, ci_id) > configuration_item.(client_id, id)
+Ref: ci_service_link.(service_id) > service.(id)
+Ref: ci_service_link.(subservice_id) > subservice.(id)
+Ref: offering_ci.(client_id) > client.(id)
+Ref: offering_ci.(client_id, offering_id) > service_offering.(client_id, id)
+Ref: offering_ci.(client_id, ci_id) > configuration_item.(client_id, id)
+Ref: calendar_version.(calendar_id) > business_calendar.(id)
+Ref: calendar_week_interval.(calendar_version_id) > calendar_version.(id)
+Ref: calendar_exception.(calendar_version_id) > calendar_version.(id)
+Ref: calendar_exception_interval.(exception_id) > calendar_exception.(id)
+Ref: calendar_work_interval.(calendar_version_id) > calendar_version.(id)
+Ref: sla_policy_set.(client_id) > client.(id)
+Ref: sla_policy_version.(client_id) > client.(id)
+Ref: sla_policy_version.(client_id, policy_set_id) > sla_policy_set.(client_id, id)
+Ref: sla_rule.(client_id) > client.(id)
+Ref: sla_rule.(client_id, policy_version_id) > sla_policy_version.(client_id, id)
+Ref: sla_target.(client_id) > client.(id)
+Ref: sla_target.(client_id, rule_id) > sla_rule.(client_id, id)
+Ref: sla_target.(calendar_version_id) > calendar_version.(id)
+Ref: routing_version.(client_id) > client.(id)
+Ref: routing_rule.(client_id) > client.(id)
+Ref: routing_rule.(client_id, routing_version_id) > routing_version.(client_id, id)
+Ref: routing_rule.(group_id) > resolver_group.(id)
+Ref: routing_rule.(assignee_user_id) > app_user.(id)
+Ref: routing_rule.(fallback_group_id) > resolver_group.(id)
+Ref: ticket.(client_id) > client.(id)
+Ref: ticket.(client_id, project_id) > project.(client_id, id)
+Ref: ticket.(client_id, offering_id) > service_offering.(client_id, id)
+Ref: ticket.(client_id, requester_level_id) > requester_level.(client_id, id)
+Ref: ticket.(reporter_user_id) > app_user.(id)
+Ref: ticket.(created_by) > app_user.(id)
+Ref: ticket.(current_group_id) > resolver_group.(id)
+Ref: ticket.(assignee_user_id) > app_user.(id)
+Ref: ticket_ci.(client_id) > client.(id)
+Ref: ticket_ci.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: ticket_ci.(client_id, ci_id) > configuration_item.(client_id, id)
+Ref: ticket_comment.(client_id) > client.(id)
+Ref: ticket_comment.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: ticket_comment.(author_user_id) > app_user.(id)
+Ref: attachment.(client_id) > client.(id)
+Ref: attachment.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: attachment.(client_id, comment_id) > ticket_comment.(client_id, id)
+Ref: attachment.(uploaded_by) > app_user.(id)
+Ref: ticket_participant.(client_id) > client.(id)
+Ref: ticket_participant.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: ticket_participant.(user_id) > app_user.(id)
+Ref: ticket_participant.(added_by) > app_user.(id)
+Ref: ticket_relation.(client_id) > client.(id)
+Ref: ticket_relation.(client_id, source_ticket_id) > ticket.(client_id, id)
+Ref: ticket_relation.(client_id, target_ticket_id) > ticket.(client_id, id)
+Ref: tag.(client_id) > client.(id)
+Ref: tag.(client_id, project_id) > project.(client_id, id)
+Ref: ticket_tag.(client_id) > client.(id)
+Ref: ticket_tag.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: ticket_tag.(client_id, tag_id) > tag.(client_id, id)
+Ref: ticket_event.(client_id) > client.(id)
+Ref: ticket_event.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: ticket_event.(actor_user_id) > app_user.(id)
+Ref: ticket_assignment.(client_id) > client.(id)
+Ref: ticket_assignment.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: ticket_assignment.(group_id) > resolver_group.(id)
+Ref: ticket_assignment.(assignee_user_id) > app_user.(id)
+Ref: ticket_assignment.(assigned_by) > app_user.(id)
+Ref: ticket_assignment.(client_id, routing_rule_id) > routing_rule.(client_id, id)
+Ref: ticket_transfer.(client_id) > client.(id)
+Ref: ticket_transfer.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: ticket_transfer.(client_id, from_assignment_id) > ticket_assignment.(client_id, id)
+Ref: ticket_transfer.(client_id, result_assignment_id) > ticket_assignment.(client_id, id)
+Ref: ticket_transfer.(to_group_id) > resolver_group.(id)
+Ref: ticket_transfer.(requested_by) > app_user.(id)
+Ref: ticket_transfer.(decided_by) > app_user.(id)
+Ref: ticket_cycle.(client_id) > client.(id)
+Ref: ticket_cycle.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: sla_evaluation.(client_id) > client.(id)
+Ref: sla_evaluation.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: sla_evaluation.(client_id, cycle_id) > ticket_cycle.(client_id, id)
+Ref: sla_evaluation.(client_id, policy_version_id) > sla_policy_version.(client_id, id)
+Ref: sla_evaluation.(client_id, rule_id) > sla_rule.(client_id, id)
+Ref: sla_evaluation.(actor_user_id) > app_user.(id)
+Ref: ticket_sla_clock.(client_id) > client.(id)
+Ref: ticket_sla_clock.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: ticket_sla_clock.(client_id, cycle_id) > ticket_cycle.(client_id, id)
+Ref: sla_clock_revision.(client_id) > client.(id)
+Ref: sla_clock_revision.(client_id, clock_id) > ticket_sla_clock.(client_id, id)
+Ref: sla_clock_revision.(client_id, evaluation_id) > sla_evaluation.(client_id, id)
+Ref: sla_clock_revision.(client_id, target_id) > sla_target.(client_id, id)
+Ref: sla_clock_revision.(calendar_version_id) > calendar_version.(id)
+Ref: sla_pause.(client_id) > client.(id)
+Ref: sla_pause.(client_id, clock_id) > ticket_sla_clock.(client_id, id)
+Ref: sla_pause.(client_id, trigger_comment_id) > ticket_comment.(client_id, id)
+Ref: sla_pause.(started_by) > app_user.(id)
+Ref: sla_pause.(ended_by) > app_user.(id)
+Ref: sla_clock_event.(client_id) > client.(id)
+Ref: sla_clock_event.(client_id, clock_id) > ticket_sla_clock.(client_id, id)
+Ref: sla_clock_event.(client_id, source_event_id) > ticket_event.(client_id, id)
+Ref: sla_alert.(client_id) > client.(id)
+Ref: sla_alert.(client_id, clock_id) > ticket_sla_clock.(client_id, id)
+Ref: notification.(client_id) > client.(id)
+Ref: notification.(recipient_user_id) > app_user.(id)
+Ref: notification.(client_id, ticket_id) > ticket.(client_id, id)
+Ref: notification_preference.(user_id) > app_user.(id)
+Ref: notification_delivery.(client_id) > client.(id)
+Ref: notification_delivery.(client_id, notification_id) > notification.(client_id, id)
+Ref: idempotency_record.(actor_user_id) > app_user.(id)
+Ref: audit_event.(client_id) > client.(id)
+Ref: audit_event.(actor_user_id) > app_user.(id)
+Ref: export_job.(client_id) > client.(id)
+Ref: export_job.(requested_by) > app_user.(id)

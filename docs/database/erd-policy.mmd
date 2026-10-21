@@ -1,0 +1,121 @@
+erDiagram
+    business_calendar {
+        char_36_ id PK
+        varchar_64_ code
+        varchar_160_ name
+        varchar_32_ status
+    }
+    calendar_version {
+        char_36_ id PK
+        char_36_ calendar_id
+        int revision
+        varchar_160_ timezone
+        varchar_64_ tzdb_version
+        varchar_64_ engine_version
+        date coverage_start
+        date coverage_end
+        char_64_ content_hash
+        varchar_32_ status
+        datetime_3_ published_at
+    }
+    calendar_week_interval {
+        char_36_ id PK
+        char_36_ calendar_version_id
+        int weekday_iso
+        int start_minute
+        int end_minute
+    }
+    calendar_exception {
+        char_36_ id PK
+        char_36_ calendar_version_id
+        date local_date
+        varchar_160_ name
+        json recurrence_source
+    }
+    calendar_exception_interval {
+        char_36_ id PK
+        char_36_ exception_id
+        int start_minute
+        int end_minute
+    }
+    calendar_work_interval {
+        char_36_ id PK
+        char_36_ calendar_version_id
+        datetime_3_ start_at
+        datetime_3_ end_at
+    }
+    sla_policy_set {
+        char_36_ id PK
+        char_36_ client_id
+        varchar_160_ name
+        varchar_32_ status
+    }
+    sla_policy_version {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ policy_set_id
+        int revision
+        datetime_3_ effective_from
+        varchar_64_ engine_version
+        char_64_ content_hash
+        varchar_32_ status
+        datetime_3_ published_at
+    }
+    sla_rule {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ policy_version_id
+        int rule_order
+        varchar_160_ name
+        json conditions
+        varchar_32_ priority
+        boolean is_fallback
+    }
+    sla_target {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ rule_id
+        varchar_32_ metric
+        bigint target_ms
+        char_36_ calendar_version_id
+        json pause_reasons
+        bigint max_pause_ms
+        json warning_thresholds
+    }
+    routing_version {
+        char_36_ id PK
+        char_36_ client_id
+        varchar_160_ name
+        int revision
+        varchar_32_ status
+        datetime_3_ published_at
+    }
+    routing_rule {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ routing_version_id
+        int rule_order
+        json conditions
+        char_36_ group_id
+        char_36_ assignee_user_id
+        char_36_ fallback_group_id
+    }
+    business_calendar ||--o{ calendar_version : "calendar_id"
+    calendar_version ||--o{ calendar_week_interval : "calendar_version_id"
+    calendar_version ||--o{ calendar_exception : "calendar_version_id"
+    calendar_exception ||--o{ calendar_exception_interval : "exception_id"
+    calendar_version ||--o{ calendar_work_interval : "calendar_version_id"
+    client ||--o{ sla_policy_set : ""
+    client ||--o{ sla_policy_version : ""
+    sla_policy_set ||--o{ sla_policy_version : "policy_set_id"
+    client ||--o{ sla_rule : ""
+    sla_policy_version ||--o{ sla_rule : "policy_version_id"
+    client ||--o{ sla_target : ""
+    sla_rule ||--o{ sla_target : "rule_id"
+    calendar_version ||--o{ sla_target : "calendar_version_id"
+    client ||--o{ routing_version : ""
+    client ||--o{ routing_rule : ""
+    routing_version ||--o{ routing_rule : "routing_version_id"
+    resolver_group ||--o{ routing_rule : "group_id"
+    app_user |o--o{ routing_rule : "assignee_user_id"
+    resolver_group |o--o{ routing_rule : "fallback_group_id"

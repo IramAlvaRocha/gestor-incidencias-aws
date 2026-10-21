@@ -1,0 +1,94 @@
+erDiagram
+    app_user {
+        char_36_ id PK
+        varchar_160_ display_name
+        varchar_254_ email_display
+        varchar_32_ status
+        int version
+    }
+    identity_link {
+        char_36_ id PK
+        char_36_ user_id
+        varchar_255_ issuer
+        varchar_255_ subject
+    }
+    employee {
+        char_36_ id PK
+        char_36_ user_id
+        varchar_32_ agency_role
+        varchar_32_ status
+    }
+    client {
+        char_36_ id PK
+        varchar_160_ name
+        varchar_64_ slug
+        varchar_32_ status
+        int version
+    }
+    requester_level {
+        char_36_ id PK
+        char_36_ client_id
+        varchar_64_ code
+        varchar_160_ name
+        varchar_32_ status
+    }
+    client_contact {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ user_id
+        char_36_ requester_level_id
+        varchar_32_ status
+    }
+    project {
+        char_36_ id PK
+        char_36_ client_id
+        varchar_160_ name
+        varchar_64_ project_key
+        char_36_ manager_user_id
+        varchar_32_ status
+        int version
+    }
+    project_member {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ project_id
+        char_36_ user_id
+        varchar_32_ role
+        char_36_ requester_level_id
+        varchar_32_ status
+        datetime_3_ valid_from
+        datetime_3_ valid_until
+    }
+    project_counter {
+        char_36_ id PK
+        char_36_ project_id
+        bigint next_number
+    }
+    invitation {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ project_id
+        varchar_254_ email_normalized
+        varchar_32_ role
+        char_64_ token_hash
+        datetime_3_ expires_at
+        datetime_3_ accepted_at
+        datetime_3_ revoked_at
+        char_36_ invited_by
+    }
+    app_user ||--o{ identity_link : "user_id"
+    app_user ||--o| employee : "user_id"
+    client ||--o{ requester_level : ""
+    client ||--o{ client_contact : ""
+    app_user ||--o{ client_contact : "user_id"
+    requester_level |o--o{ client_contact : "requester_level_id"
+    client ||--o{ project : ""
+    app_user ||--o{ project : "manager_user_id"
+    client ||--o{ project_member : ""
+    project ||--o{ project_member : "project_id"
+    app_user ||--o{ project_member : "user_id"
+    requester_level |o--o{ project_member : "requester_level_id"
+    project ||--o| project_counter : "project_id"
+    client ||--o{ invitation : ""
+    project ||--o{ invitation : "project_id"
+    app_user ||--o{ invitation : "invited_by"

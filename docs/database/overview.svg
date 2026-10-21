@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="770" viewBox="0 0 1220 770" role="img" aria-labelledby="title desc">
+<title id="title">Arena: dominios y relaciones del modelo objetivo</title>
+<desc id="desc">Identidad externa vinculada lógicamente al perfil local. Clientes y proyectos delimitan catálogo, CMDB y tickets. Políticas versionadas originan evaluaciones y relojes independientes por ciclo.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#65778d"/></marker></defs>
+<rect width="1220" height="770" fill="#f5f7fa"/>
+<g font-family="system-ui,Arial,sans-serif" fill="#142b46">
+<text x="30" y="40" font-size="23" font-weight="600">Arena · relaciones principales</text>
+<text x="30" y="66" font-size="14">Vista de dominios. Las claves, cardinalidades y campos están en los ERD por módulo.</text>
+<g stroke="#b8c7d8" fill="#fff">
+<rect x="30" y="100" width="320" height="125" rx="6"/><rect x="450" y="100" width="320" height="125" rx="6"/><rect x="870" y="100" width="320" height="125" rx="6"/>
+<rect x="30" y="300" width="320" height="140" rx="6"/><rect x="450" y="300" width="320" height="140" rx="6"/><rect x="870" y="300" width="320" height="140" rx="6"/>
+<rect x="30" y="530" width="320" height="160" rx="6"/><rect x="450" y="530" width="320" height="160" rx="6"/><rect x="870" y="530" width="320" height="160" rx="6"/>
+</g>
+<g font-size="18" font-weight="600">
+<text x="50" y="130">Autenticación · DB separada</text><text x="470" y="130">Perfil y acceso local</text><text x="890" y="130">Clientes y proyectos</text>
+<text x="50" y="330">Calendarios y políticas</text><text x="470" y="330">Catálogo y cobertura</text><text x="890" y="330">CMDB</text>
+<text x="50" y="560">SLA en ejecución</text><text x="470" y="560">Ticket y ciclos</text><text x="890" y="560">Colaboración y operación</text>
+</g>
+<g font-size="14">
+<text x="50" y="157">auth_account → auth_session</text><text x="50" y="181">refresh rotatorio · MFA · claves</text><text x="50" y="205">Opcional: sustituible por Cognito</text>
+<text x="470" y="157">app_user ← identity_link</text><text x="470" y="181">empleado · contacto · nivel</text><text x="470" y="205">ProjectMember decide permisos</text>
+<text x="890" y="157">client → project → project_member</text><text x="890" y="181">grupos habilitados por proyecto</text><text x="890" y="205">aislamiento de datos en cada API</text>
+<text x="50" y="359">calendar_version → ventanas UTC</text><text x="50" y="384">sla_policy_version → regla → objetivo</text><text x="50" y="409">respuesta y resolución independientes</text>
+<text x="470" y="359">producto · servicio · subservicio</text><text x="470" y="384">service_offering por proyecto</text><text x="470" y="409">nivel · vigencia · ruta · política</text>
+<text x="890" y="359">configuration_item → clase</text><text x="890" y="384">ci_relation · ci_service_link</text><text x="890" y="409">offering_ci limita selección</text>
+<text x="50" y="590">sla_evaluation → ticket_sla_clock</text><text x="50" y="615">sla_clock_revision · sla_pause</text><text x="50" y="640">eventos · alertas · breached_at</text><text x="50" y="665">cambiar asignación no reinicia SLA</text>
+<text x="470" y="590">ticket → ticket_cycle → relojes</text><text x="470" y="615">ticket_assignment · ticket_transfer</text><text x="470" y="640">snapshots de clasificación y regla</text><text x="470" y="665">version para cambios concurrentes</text>
+<text x="890" y="590">comentarios · archivos · participantes</text><text x="890" y="615">actividad · auditoría · exportaciones</text><text x="890" y="640">outbox → avisos → entrega</text><text x="890" y="665">permisos revisados al enviar</text>
+</g>
+<g fill="none" stroke="#65778d" stroke-width="2" marker-end="url(#arrow)">
+<path d="M350 155H450" stroke-dasharray="6 4"/><path d="M770 160H870"/>
+<path d="M1030 225V300"/><path d="M950 225V260H690V300"/>
+<path d="M450 370H350"/><path d="M870 370H770"/>
+<path d="M190 440V530"/><path d="M610 440V530"/>
+<path d="M450 600H350"/><path d="M770 600H870"/>
+</g>
+<g font-size="12" fill="#435872"><text x="363" y="143">iss + sub</text><text x="210" y="485">versión fijada</text><text x="625" y="485">oferta vigente</text><text x="30" y="733">Línea punteada: vínculo lógico entre servicios, sin foreign key ni acceso compartido a las bases.</text><text x="30" y="754">Modelo propuesto · Las migraciones se hacen por etapas · Las cinco tablas actuales permanecen operativas durante la transición.</text></g>
+</g></svg>

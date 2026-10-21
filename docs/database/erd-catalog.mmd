@@ -1,0 +1,120 @@
+erDiagram
+    area {
+        char_36_ id PK
+        varchar_64_ code
+        varchar_160_ name
+        char_36_ owner_user_id
+        varchar_32_ status
+    }
+    resolver_group {
+        char_36_ id PK
+        char_36_ area_id
+        varchar_64_ code
+        varchar_160_ name
+        char_36_ lead_user_id
+        char_36_ backup_user_id
+        varchar_32_ status
+    }
+    group_member {
+        char_36_ id PK
+        char_36_ group_id
+        char_36_ user_id
+        varchar_32_ status
+    }
+    project_group {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ project_id
+        char_36_ group_id
+        varchar_32_ status
+    }
+    product {
+        char_36_ id PK
+        varchar_64_ code
+        varchar_160_ name
+        varchar_160_ vendor
+        varchar_32_ status
+    }
+    client_product {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ product_id
+        varchar_160_ contract_reference
+        varchar_32_ status
+        datetime_3_ valid_from
+        datetime_3_ valid_until
+    }
+    service_category {
+        char_36_ id PK
+        varchar_64_ code
+        varchar_160_ name
+        varchar_32_ status
+    }
+    service {
+        char_36_ id PK
+        char_36_ category_id
+        varchar_64_ code
+        varchar_160_ name
+        varchar_32_ status
+    }
+    subservice {
+        char_36_ id PK
+        char_36_ service_id
+        varchar_64_ code
+        varchar_32_ status
+    }
+    subservice_version {
+        char_36_ id PK
+        char_36_ subservice_id
+        int revision
+        varchar_160_ name
+        text description
+        varchar_32_ request_type
+        json form_schema
+        char_36_ default_group_id
+        boolean requires_ci
+        varchar_32_ status
+        datetime_3_ published_at
+    }
+    service_offering {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ project_id
+        char_36_ subservice_version_id
+        char_36_ client_product_id
+        char_36_ routing_version_id
+        char_36_ sla_policy_version_id
+        varchar_32_ status
+        datetime_3_ valid_from
+        datetime_3_ valid_until
+    }
+    offering_level {
+        char_36_ id PK
+        char_36_ client_id
+        char_36_ offering_id
+        char_36_ requester_level_id
+    }
+    app_user ||--o{ area : "owner_user_id"
+    area ||--o{ resolver_group : "area_id"
+    app_user ||--o{ resolver_group : "lead_user_id"
+    app_user |o--o{ resolver_group : "backup_user_id"
+    resolver_group ||--o{ group_member : "group_id"
+    app_user ||--o{ group_member : "user_id"
+    client ||--o{ project_group : ""
+    project ||--o{ project_group : "project_id"
+    resolver_group ||--o{ project_group : "group_id"
+    client ||--o{ client_product : ""
+    product ||--o{ client_product : "product_id"
+    service_category ||--o{ service : "category_id"
+    service ||--o{ subservice : "service_id"
+    subservice ||--o{ subservice_version : "subservice_id"
+    resolver_group ||--o{ subservice_version : "default_group_id"
+    client ||--o{ service_offering : ""
+    project ||--o{ service_offering : "project_id"
+    subservice_version ||--o{ service_offering : "subservice_version_id"
+    client_product |o--o{ service_offering : "client_product_id"
+    routing_version |o--o{ service_offering : "routing_version_id"
+    sla_policy_version |o--o{ service_offering : "sla_policy_version_id"
+    client ||--o{ offering_level : ""
+    service_offering ||--o{ offering_level : "offering_id"
+    requester_level ||--o{ offering_level : "requester_level_id"
