@@ -18,7 +18,7 @@ describe('Ticket Entity', () => {
     priority: "Low",
     reporterId: randomUUID(),
     projectId: randomUUID(),
-    createdAt: new Date()
+    createdAt: new Date("2026-10-21T12:00:00.000Z")
   }
 
   expect( ()=> {
@@ -26,5 +26,24 @@ describe('Ticket Entity', () => {
   }).toThrow(InvalidTitleError)
   
   
+  })
+
+  it("creates a ticket with three-characters title after trimming", () => {
+    const ticket2: CreateTicketProps = {
+    id : "2",
+    key: "PROJ-1",
+    title: "  abs   ",
+    description: "Ticket description for testing with vitest",
+    type: "Bug",
+    priority: "Low",
+    reporterId: randomUUID(),
+    projectId: randomUUID(),
+    createdAt: new Date("2026-10-21T12:00:00.000Z")
+    }
+
+    const createdTicket = Ticket.create(ticket2);
+
+    expect(createdTicket.title).toBe("abs")
+    expect(createdTicket.status).toBe("Open")
   })
 })
