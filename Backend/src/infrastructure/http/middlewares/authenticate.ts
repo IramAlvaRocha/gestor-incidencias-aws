@@ -15,7 +15,7 @@ export const authenticate = (tokenService: ITokenService) =>
             const payload = tokenService.verify(token);
             req.authenticatedUser = payload;
             next();
-        } catch (error) {
+        } catch {
             return res.status(401).json({ error: 'Invalid or expired token' }); 
         }
 }

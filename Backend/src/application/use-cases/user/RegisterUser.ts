@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import { User } from "../../../domain/entities/user.entity.js";
 import { EmailAlreadyRegisteredError } from "../../../domain/errors/UserError.js";
 import type { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
